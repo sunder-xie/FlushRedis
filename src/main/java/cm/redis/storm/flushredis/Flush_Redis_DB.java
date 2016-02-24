@@ -24,124 +24,67 @@ public class Flush_Redis_DB {
 	public static void main(String[] args)
 	{
 		RedisServer redisserver=null;
-		TreeSet<String> srckeys=null; 
-		TreeSet<String> dstkeys=null;
-		TreeSet<String> ipset=null;
-		Iterator<String> tsit =null;
-		Iterator<String> hsit =null;
+		TreeSet<String> keys=null; 
+		Iterator<String> keylist =null;
+		String date=null;
 		String key=null;
 		String dt=null;
 		String ip=null;
 		int test_ip_num=0;
-		int size=0;
-		HashMap<String,TreeSet<String>> hashmap=null;	
 		while(true)
 		{
 			// 每天凌晨 3 点执行
-			if(TimeFormatter.getHour().equals("03"))
+			if(TimeFormatter.getHour().equals("10"))
 			{
 				//获取实例
 				redisserver=RedisServer.getInstance();
-				hashmap=new HashMap<String,TreeSet<String>>();
 				test_ip_num=0;
-				size=0;
 				logger.info(" Start to get all storm-redis-keys");
-				srckeys=redisserver.keys("src_date*"); 
-				dstkeys=redisserver.keys("dst_date*");
+				
+				date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
+				keys=redisserver.keys("*"); 		//获取所有的keys
+
 				try {
 					logger.info(" Start to clear storm-redis-keys which are out of date!!!");
-					tsit = srckeys.iterator();
-					while(tsit.hasNext())
+					keylist = keys.iterator();
+					while(keylist.hasNext())
 					{
-						key=tsit.next().toString();
+						key=keylist.next().toString();
 						ip=StringUtils.substringAfterLast(key, "_");	//获取key中的ip信息
-						dt=redisserver.get(key);
-						if(hashmap.containsKey(dt)==false)
-						{
-							ipset=new TreeSet<String>();
-						}
-						else{
-							ipset=hashmap.get(dt);
-						}
-						ipset.add(ip);
-						hashmap.put(dt, ipset);
-					}
-					
-					if(hashmap.isEmpty()==false){
-						ipset=new TreeSet<String>();
-						ipset.addAll(hashmap.keySet());
-						size=ipset.size()-1;
-						hsit=ipset.iterator();
-						for(int i=0;i<size;i++)
-						{
-							key=hsit.next().toString();//按照日期，除了最后一个日期之外的键值都进行ip删除
-							ipset=hashmap.get(key);
-							tsit=ipset.iterator();
-							while(tsit.hasNext())
+						if(StringUtils.contains(key, "src_date")==false && StringUtils.contains(key, "dst_date")==false ){
+							if(StringUtils.contains(key, date)==false){
+								redisserver.del(key);
+							}
+							key="src_date_"+ip;
+							dt=redisserver.get(key);
+							if(dt!=null)
 							{
-								ip=tsit.next().toString();
-								redisserver.del("src_"+key);
-								redisserver.del("src_"+key+"_"+ip);
-								redisserver.del("src_"+key+"_detail1_"+ip);
-								redisserver.del("src_"+key+"_detail2_"+ip);
-								test_ip_num+=1;
+								if(StringUtils.equals(dt, date)==false){
+									redisserver.del(key);
+								}
+							}
+							key="dst_date_"+ip;
+							dt=redisserver.get(key);
+							if(dt!=null)
+							{
+								if(StringUtils.equals(dt, date)==false){
+									redisserver.del(key);
+								}
 							}
 						}
-						hashmap.clear();
-					}
-	
-					tsit = dstkeys.iterator();
-					while(tsit.hasNext())
-					{
-						key=tsit.next().toString();
-						ip=StringUtils.substringAfterLast(key, "_");	//获取key中的ip信息
-						dt=redisserver.get(key);
-						if(hashmap.containsKey(dt)==false)
-						{
-							ipset=new TreeSet<String>();
-						}
-						else{
-							ipset=hashmap.get(dt);
-						}
-						ipset.add(ip);
-						hashmap.put(dt, ipset);
-					}
-	
-					if(hashmap.isEmpty()==false){
-						ipset=new TreeSet<String>();
-						ipset.addAll(hashmap.keySet());
-						size=ipset.size()-1;
-						hsit=ipset.iterator();
-	
-						for(int i=0;i<size;i++)
-						{
-							key=hsit.next().toString();//按照日期，除了最后一个日期之外的键值都进行ip删除
-							ipset=hashmap.get(key);
-							tsit=ipset.iterator();
-							while(tsit.hasNext())
-							{
-								ip=tsit.next().toString();
-								redisserver.del("dst_"+key);
-								redisserver.del("dst_"+key+"_"+ip);
-								redisserver.del("dst_"+key+"_detail1_"+ip);
-								redisserver.del("dst_"+key+"_detail2_"+ip);
-								test_ip_num+=1;
-							}
-						}
-						hashmap.clear();
+						test_ip_num+=1;
 					}
 
+					test_ip_num=test_ip_num/5;
+					
 					//释放内存
 					redisserver=null;
-					srckeys=null;
-					dstkeys=null;
-					tsit=null;
-					hsit=null;
+					date=null;
+					keys=null;
+					keylist=null;
 					key=null;
 					dt=null;
 					ip=null;
-					hashmap=null;
-					ipset=null;
 					
 					logger.info(" Complete clear redis-keys, removes "+test_ip_num+" ip (out of date)");					
 					Thread.sleep(1000*60*60*22);
