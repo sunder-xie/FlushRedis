@@ -33,7 +33,7 @@ public class Flush_Redis_DB {
 		while(true)
 		{
 			// 每天凌晨 3 点执行
-			if(TimeFormatter.getHour().equals("10"))
+			if(TimeFormatter.getHour().equals("03"))
 			{
 				//获取实例
 				redisserver=RedisServer.getInstance();
