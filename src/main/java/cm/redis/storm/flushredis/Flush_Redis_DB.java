@@ -29,7 +29,6 @@ public class Flush_Redis_DB {
 		String date=null;
 		String key=null;
 		String dt=null;
-		String ip=null;
 		int test_ip_num=0;
 		while(true)
 		{
@@ -50,29 +49,22 @@ public class Flush_Redis_DB {
 					while(keylist.hasNext())
 					{
 						key=keylist.next().toString();
-						ip=StringUtils.substringAfterLast(key, "_");	//获取key中的ip信息
 						if(StringUtils.contains(key, "src_date")==false && StringUtils.contains(key, "dst_date")==false ){
 							if(StringUtils.contains(key, date)==false){
 								redisserver.del(key);
+								test_ip_num+=1;
 							}
-							key="src_date_"+ip;
+						}
+						else{
 							dt=redisserver.get(key);
 							if(dt!=null)
 							{
 								if(StringUtils.equals(dt, date)==false){
 									redisserver.del(key);
-								}
-							}
-							key="dst_date_"+ip;
-							dt=redisserver.get(key);
-							if(dt!=null)
-							{
-								if(StringUtils.equals(dt, date)==false){
-									redisserver.del(key);
+									test_ip_num+=1;
 								}
 							}
 						}
-						test_ip_num+=1;
 					}
 
 					test_ip_num=test_ip_num/5;
@@ -84,7 +76,6 @@ public class Flush_Redis_DB {
 					keylist=null;
 					key=null;
 					dt=null;
-					ip=null;
 					
 					logger.info(" Complete clear redis-keys, removes "+test_ip_num+" ip (out of date)");					
 					Thread.sleep(1000*60*60*22);
