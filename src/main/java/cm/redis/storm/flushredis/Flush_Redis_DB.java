@@ -1,7 +1,6 @@
 package cm.redis.storm.flushredis;
 
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
