@@ -31,8 +31,8 @@ public class Flush_Redis_DB {
 		int test_ip_num=0;
 		while(true)
 		{
-			// 每天凌晨 3 点执行
-			if(TimeFormatter.getHour().equals("03"))
+			// 每天凌晨 2 点与下午14点执行
+			if(TimeFormatter.getHour().equals("02")==true||TimeFormatter.getHour().equals("14")==true)
 			{
 				//获取实例
 				redisserver=RedisServer.getInstance();
@@ -77,7 +77,7 @@ public class Flush_Redis_DB {
 					dt=null;
 					
 					logger.info(" Complete clear redis-keys, removes "+test_ip_num+" ip (out of date)");					
-					Thread.sleep(1000*60*60*22);
+					Thread.sleep(1000*60*60*11);
 				} catch (Exception e) {
 					logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 				}
