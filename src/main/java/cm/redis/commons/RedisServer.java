@@ -67,9 +67,8 @@ public class RedisServer {
 	//关闭会话
 	public void close(){
 		 try {
-			jedisCluster.close();
+			if(jedisCluster!=null)jedisCluster.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			logger.error("Close jediscluster error: ", e);  
 		}
 	}
