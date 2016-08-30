@@ -31,7 +31,7 @@ public class Flush_Redis_DB {
 		int test_ip_num=0;
 		while(true)
 		{
-			// 每天凌晨 2 点与下午14点执行
+			// 每天凌晨 2 点与下午14点执行，负责清理大日志过期的数据信息
 			if(TimeFormatter.getHour().equals("02")==true||TimeFormatter.getHour().equals("14")==true)
 			{
 				//获取实例
@@ -49,7 +49,8 @@ public class Flush_Redis_DB {
 					{
 						key=keylist.next().toString();
 						if(StringUtils.contains(key, "src_date")==false && StringUtils.contains(key, "dst_date")==false ){
-							if(StringUtils.contains(key, date)==false){
+							if(StringUtils.contains(key, date)==false&&
+							(StringUtils.startsWith(key, "src")==true||StringUtils.startsWith(key, "dst")==true)){
 								redisserver.del(key);
 								test_ip_num+=1;
 							}
