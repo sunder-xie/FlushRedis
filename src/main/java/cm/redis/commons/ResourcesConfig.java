@@ -19,7 +19,10 @@ public class ResourcesConfig {
 	public final static int CLUSTER_TIMEOUT=15*1000;						//获取集群信息的超时时间
 	public final static int CLUSTER_MAX_REDIRECTIONS=5; 			//获取重定向的次数
 	
-	public final static String REDIS_SERVER_IP="10.245.254.53";		//redis数据库IP地址
+	public final static String REDIS_SERVER_IP="10.245.254.56";		//redis数据库IP地址
 	public final static String REDIS_SERVER_PORT="7000";				//redis数据库端口
 	
+	// 数据枢纽接口的文件，以及数据存放路径，最后带有/
+	public final static String SYN_SERVER_DATAFILE="/home/storm/netantdata/ref/";  //正式服务器地址
+	//public final static String SYN_SERVER_DATAFILE="E:/";  					//测试地址
 }
