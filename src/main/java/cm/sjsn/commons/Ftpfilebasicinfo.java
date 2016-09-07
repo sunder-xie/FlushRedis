@@ -12,7 +12,7 @@ public class Ftpfilebasicinfo {
 	private String filename="";
 	private String ftpusername="";
 	private String ftppassword="";
-	private String filestatus="";
+	private String filestatus="running";
     private String zippassword="";
     private String md5value="";
 	public String getFtppath() {

@@ -3,6 +3,7 @@ package cm.sjsn.commons;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 
+import cm.redis.commons.RedisServer;
 import cm.redis.commons.ResourcesConfig;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -32,20 +34,66 @@ public class G4jk_ref_Syn {
 		public static Logger logger=Logger.getLogger(G4jk_ref_Syn.class);
 		
 		private File [] extractedFiles=null;
+		public File[] getExtractedFiles() 
+		{
+			return extractedFiles;
+		}
+		public void setExtractedFiles(File[] extractedFiles)
+		{
+			this.extractedFiles = extractedFiles;
+		}
 
+		/**
+		 * 删除对应数据接口存放数据文件目录下的所有文件，也就是先做数据清理，只删除文件，不删除文件夹
+		 * @param private_folder 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的数据枢纽数据文件夹名称，最后不需要添加"/"
+		 */
+		public void deletefiles(String private_folder)
+		{
+			logger.info(" [deletefiles method] starts");
+			try
+			{
+				String filepath=null;
+				if(private_folder==null||private_folder.trim().equals(""))private_folder="default";
+				filepath=ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/";
+			    File file = new File(filepath);
+			    if (!file.exists()) {
+			    	logger.info(" [deletefiles method] has no files");
+			    	return;
+			    }
+			    if (!file.isDirectory()) {
+			    	logger.info(" [deletefiles method] not a directory");
+			    	return;
+			    }
+			    String[] tempList = file.list();
+			    File temp = null;
+			    for (int i = 0; i < tempList.length; i++) {
+			    	temp = new File(filepath + tempList[i]);  	//filepath已经带有File.separator
+			    	if (temp.isFile()) {
+			    		temp.delete();
+			    	}
+			    	if (temp.isDirectory()) {
+			    		deletefiles(private_folder+"/" + tempList[i]);	//递归删除文件夹里面的文件
+			    	}
+			    }
+			    logger.info(" [deletefiles method] ends successfully");
+			}
+			catch(Exception ex)
+			{
+				logger.info(" [deletefiles method] runing error: "+ex.getMessage());
+			}
+		}		
+		
 		//调用数据枢纽获取热点区域维表对应的接口文件信息
 		/**
 		 * 按照接口格式获取数据文件的对应下载结构信息
 		 * @param add_url   数据枢纽http url路径
 		 * @param json_params 获取文件信息所需的参数构成的json格式
-		 * @return
+		 * @return Ftpfilebasicinfo 返回文件结构内容
 		 */
 		public Ftpfilebasicinfo getfileinfo(String add_url, String json_params)
 		{
 			logger.info("[getfileinfo method] starts");
-			//String add_url = "http://10.245.254.110:8080/etl_platform/rest/service.shtml";
-	        //String json_params = "{\"identify\": \"26c068d5-5cf5-4951-9df4-0e597c4f0bbb\", \"userName\":\"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\"\",\"flux\":\"100\",\"amt\":\"20\"}}";
-	        HttpClient client = new HttpClient();
+			HttpClient client = new HttpClient();
 	        
 			PostMethod post = new PostMethod(add_url);
 	        StringRequestEntity entity = null;
@@ -130,12 +178,12 @@ public class G4jk_ref_Syn {
 	        		    	key_value=null;
 	        		    }
 	        		    tmplist=null;
-	        		    /*logger.info(fileinfo.md5value+","+
-	        		    		fileinfo.ftppassword+","+
-	        		    		fileinfo.ftppath+","+
-	        		    		fileinfo.ftpusername+","+
-	        		    		fileinfo.filestatus+","+
-	        		    		fileinfo.zippassword);*/ //输出测试
+	        		    logger.info(fileinfo.getMd5value()+","+
+	        		    		fileinfo.getFtppassword()+","+
+	        		    		fileinfo.getFtppath()+","+
+	        		    		fileinfo.getFtpusername()+","+
+	        		    		fileinfo.getFilestatus()+","+
+	        		    		fileinfo.getZippassword()); //输出测试
 	    		    }
 	    		    //logger.info(body);  //输出测试
 	    	        bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容
@@ -158,13 +206,22 @@ public class G4jk_ref_Syn {
 		/**
 		 * 依据数据文件的对应下载结构信息，进行文件下载
 		 * @param ftpinfo 数据文件的对应下载结构信息
-		 * @param private_folder 下载存放数据的对应文件夹
+		 * @param private_folder 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的数据枢纽数据文件夹名称，最后不需要添加"/"
+		 * @return 下载成功返回true，否则返回false
 		 */
-		public void downloadfile(Ftpfilebasicinfo ftpinfo, String private_folder)
+		public boolean downloadfile(Ftpfilebasicinfo ftpinfo, String private_folder)
 		{
 			logger.info(" [downloadfile method] starts");
+			boolean isdownldOK=false;
 			FTPClient ftp=new FTPClient();
 			FileOutputStream fos = null;
+			String filepath=null;
+			if(private_folder==null||private_folder.trim().equals(""))private_folder="default";
+			filepath=ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/";
+			File destDir = new File(filepath); 
+			if (!destDir.exists()) {  
+	            destDir.mkdir();  
+	        }  
 			try
 			{
 				ftp.connect(ftpinfo.getHostip());
@@ -173,13 +230,15 @@ public class G4jk_ref_Syn {
 				ftp.setFileType(FTP.BINARY_FILE_TYPE); //以BINARY格式传送文件
 				ftp.setBufferSize(1024 * 8);//设置缓冲区
 				ftp.setDataTimeout(30 * 1000);//设置连接超时时间长度
-				fos = new FileOutputStream(ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/"+ftpinfo.getFilename()); //确定下载目录 for 服务器
+				fos = new FileOutputStream(filepath+ftpinfo.getFilename()); //确定下载目录 for 服务器
 				ftp.retrieveFile(ftpinfo.getFilepath(), fos);
 				fos.close();
 				logger.info(" [downloadfile method] downlaods: "+ftpinfo.getFilename()+" successfully");
+				isdownldOK=true;
 			}catch(Exception ex)
 			{
 				logger.info(" [downloadfile method] runing error: "+ex.getMessage());
+				return false;
 			}
 			try
 			{
@@ -192,16 +251,17 @@ public class G4jk_ref_Syn {
 			}catch(Exception ex)
 			{
 				logger.info(" [downloadfile method] runing error: "+ex.getMessage());
+				return false;
 			}
+			return isdownldOK;
 		}
-		
-		
+
 		//将文件进行解压缩，获取目录下的所有解压出来的文件
 		/**
 		 * 解压缩已经下载的数据文件
 		 * @param ftpinfo 数据文件的对应下载结构信息
-		 * @param private_folder 下载存放数据的对应文件夹
-		 * @return true表示解压成功
+		 * @param private_folder 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的数据枢纽数据文件夹名称，最后不需要添加"/"
+		 * @return true表示解压出了实际文件
 		 */
 		@SuppressWarnings("unchecked")
 		public boolean unzipfilewithpassword(Ftpfilebasicinfo ftpinfo, String private_folder)
@@ -209,21 +269,24 @@ public class G4jk_ref_Syn {
 			boolean isunzipOK=false;
 			logger.info(" [unzipfile method] starts");
 			extractedFiles=null;
+			String filepath=null;
+			if(private_folder==null||private_folder.trim().equals(""))private_folder="default";
+			filepath=ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/";
+			File destDir = new File(filepath); 
+			if (!destDir.exists()) {  
+	            destDir.mkdir();  
+	        }
 			try
 			{
-				ZipFile zFile = new ZipFile(ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/"+ftpinfo.getFilename());  
+				ZipFile zFile = new ZipFile(filepath+ftpinfo.getFilename());  
 		        zFile.setFileNameCharset("UTF-8");  
 		        if (!zFile.isValidZipFile()) {  
 		            throw new ZipException("Zip file may be broken.");
-		        }  
-		        File destDir = new File(ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/");  
-		        if (destDir.isDirectory() && !destDir.exists()) {  
-		            destDir.mkdir();  
-		        }  
+		        } 
 		        if (zFile.isEncrypted()) {  
 		            zFile.setPassword(ftpinfo.getZippassword().toCharArray());  
 		        }  
-		        zFile.extractAll(ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/");  
+		        zFile.extractAll(filepath);  
 		          
 				List<FileHeader> headerList = zFile.getFileHeaders();  
 		        List<File> extractedFileList = new ArrayList<File>();  
@@ -232,10 +295,15 @@ public class G4jk_ref_Syn {
 		                extractedFileList.add(new File(destDir,fileHeader.getFileName()));  
 		            }  
 		        }  
-		        extractedFiles = new File[extractedFileList.size()];  
-		        extractedFileList.toArray(extractedFiles);  
+		        if(extractedFileList.size()>0){
+		        	extractedFiles = new File[extractedFileList.size()];  
+		        	extractedFileList.toArray(extractedFiles);
+		        	isunzipOK=true;
+		        	logger.info(" [unzipfile method] unziped out " + extractedFileList.size() +" files");
+		        }else{
+		        	logger.info(" [unzipfile method] no files inside");
+		        }
 		        logger.info(" [unzipfile method] ends successfully");
-		        if(extractedFileList.size()>0)isunzipOK=true;
 			}catch(Exception ex)
 			{
 				logger.info(" [unzipfile method] runing error: "+ex.getMessage());
@@ -244,80 +312,128 @@ public class G4jk_ref_Syn {
 			return isunzipOK;
 		}
 		
-		//处理解压缩后的文件
-		/*public void processunzipfile(File [] files)
+		/**
+		 * 检查解压后的文件是否有实际数据维表信息
+		 * @param files 解压缩后的文件内容列表
+		 * @return 文件含有维表信息数据，返回true，否则返回false
+		 */
+		public boolean checkunzipfilerecords(File [] files)
+		{
+			logger.info("[checkunzipfile method] starts");
+			boolean isfilecontaininfo=true;
+			try{
+				BufferedReader reader = null;
+				int line = 0; 
+				for(int i=0;i<files.length;i++)
+				{
+					line = 0;
+					reader = new BufferedReader(new FileReader(files[i]));
+					//一次读入一行
+					while ((reader.readLine()) != null) {
+						line=line+1;
+						if(line>2)break; //检验存在数据跳出当前循环
+					}
+					reader.close();
+					if(line<2)isfilecontaininfo=false;
+				}
+				logger.info("[checkunzipfile method] ends successfully");
+			}
+			catch(Exception ex)
+			{
+				logger.info("[checkunzipfile method] runing error: "+ex.getMessage());
+			}
+			return isfilecontaininfo;
+		}
+		
+		/**
+		 * 录入解压缩后的文件到redis中
+		 * @param files 解压缩后的文件内容列表
+		 */
+		public void processunzipfile(File [] files)
 		{
 			//这里假设允许将一个数据库文件拆分成多个数据库文件，所以采用这种File []的方式
-			MyString.printLog(MyTime.getNow()+" [processunzipfile method] starts");
+			logger.info(" [processunzipfile method] starts");
 			try
 			{
+				RedisServer redisserver=RedisServer.getInstance();
 				BufferedReader reader = null;
+				int choose=0;
+				String key=null;
+				String value=null;
+				String [] recinfo=null;
 				for(int i=0;i<files.length;i++)
 				{
 					reader = new BufferedReader(new FileReader(files[i]));
-					String tempString = null;
-					//int line = 1; 一次读入一行，直到读入null为文件结束
+					String tempString = reader.readLine();//先读取第一行的数据
+					choose=0;
+					if(StringUtils.contains(tempString, "imsi"))choose=1; //读取imsi对应标签的维表
+					else if(StringUtils.contains(tempString, "hotsid"))choose=2;//读取tac ci对应的标签维表
 					while ((tempString = reader.readLine()) != null) {
-						//
-						// 显示文件内容的测试代码
-						// MyString.printLog("line " + line + ": " + tempString);
-						// line++;
-						// if(line==100)break;
-
-						// 以下则是逐行读取数据并判断写入memcache中
-						if(StringUtils.contains(tempString, "tb"))continue; //如果读取到列名称行，不做处理
-						
+						// 以下则是逐行将数据做转换，录入redis数据库
+						recinfo=tempString.split(";"); //按照分号划分获取字段
+						switch(choose){
+							case 1: //imsi对应维表
+								key="ref_"+recinfo[0];
+								value=recinfo[1];
+								redisserver.set(key, value);
+								break;
+							case 2: //hotsid tac ci对应维表
+								key="ref_"+recinfo[1]+"_"+recinfo[2];
+								value=recinfo[0];
+								redisserver.set(key, value);
+								break;
+							default:
+								logger.info(" [processunzipfile method] no import method for current ref file to Redis.");
+								break;
+						}
 					}
 					reader.close();
 				}
-				MyString.printLog(MyTime.getNow()+" [processunzipfile method] ends successfully");
+				logger.info(" [processunzipfile method] ends successfully");
 			}
 			catch(Exception ex)
 			{
-				MyString.printLog(MyTime.getNow()+" [processunzipfile method] runing error: "+ex.getMessage());
-			}
-		}*/
-		
-		/**
-		 * 删除对应数据接口存放数据文件目录下的所有文件
-		 * @param filepath 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的数据枢纽数据文件夹名称
-		 */
-		public void deletefiles(String private_folder)
-		{
-			logger.info(" [deletefiles method] starts");
-			try
-			{
-				String filepath=ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/";
-			    File file = new File(filepath);
-			    if (!file.exists()) {
-			    	logger.info(" [deletefiles method] has no files");
-			    	return;
-			    }
-			    if (!file.isDirectory()) {
-			    	logger.info(" [deletefiles method] not a directory");
-			    	return;
-			    }
-			    String[] tempList = file.list();
-			    File temp = null;
-			    for (int i = 0; i < tempList.length; i++) {
-			    	if (filepath.endsWith(File.separator)) {
-			    		temp = new File(filepath + tempList[i]);
-			    	} else {
-			    		temp = new File(filepath + File.separator + tempList[i]);
-			    	}
-			    	if (temp.isFile()) {
-			    		temp.delete();
-			    	}
-			    	if (temp.isDirectory()) {
-			    		deletefiles(private_folder+"/" + tempList[i]);//递归删除文件夹里面的文件
-			    	}
-			    }
-			    logger.info(" [deletefiles method] ends successfully");
-			}
-			catch(Exception ex)
-			{
-				logger.info(" [deletefiles method] runing error: "+ex.getMessage());
+				logger.info(" [processunzipfile method] runing error: "+ex.getMessage());
 			}
 		}
 		
+		/**
+		 * 更新4G网分维表信息-对外接口
+		 * @param sjsn_id 接口提供的id
+		 * @param private_folder 存放数据的对应文件夹名称，由用户自定义 最后不需要添加"/"，
+		 */
+		public void ref_data_syn(String sjsn_id, String private_folder){
+			String url=null;
+			String json=null;
+			Ftpfilebasicinfo ftpinfo=null;
+			File[] dlfiles=null;
+			boolean check=false;
+			
+			if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
+			
+			url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+			json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
+			deletefiles(private_folder); 
+			ftpinfo=getfileinfo(url,json);
+			check=downloadfile(ftpinfo,private_folder);
+			if(check==true)
+			{
+				check=unzipfilewithpassword(ftpinfo, private_folder);
+				if(check==true){
+					dlfiles=getExtractedFiles();
+					check=checkunzipfilerecords(dlfiles);
+					//if(check==true)processunzipfile(dlfiles); 20160907由于维表数据尚未准备完毕，数据先不录入
+				}
+			}
+		}
+		
+		/**
+		 * 测试主函数
+		 * @param args
+		 */
+		public static void main(String[] args){
+			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+			g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f",null);
+			//g4jk_ref_Syn.ref_data_syn("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
+		}
 }
