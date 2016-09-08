@@ -25,4 +25,6 @@ public class ResourcesConfig {
 	// 数据枢纽接口的文件，以及数据存放路径，最后带有/
 	public final static String SYN_SERVER_DATAFILE="/home/storm/netantdata/ref/";  //正式服务器地址
 	//public final static String SYN_SERVER_DATAFILE="E:/";  					//测试地址
+	
+	
 }

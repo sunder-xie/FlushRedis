@@ -6,7 +6,7 @@
   <name>flushredis</name>
   <description>used to clear current redis database and put recent data into database</description>
   <dependencies>
-        <!-- redis操作包  2015年2月16日版本-->
+        <!-- redis操作包  2016年9月1日版本-->
         <dependency>
         	<groupId>redis.clients</groupId>
         	<artifactId>jedis</artifactId>
@@ -39,6 +39,18 @@
 		    <groupId>net.lingala.zip4j</groupId>
 		    <artifactId>zip4j</artifactId>
 		    <version>1.3.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+		    <groupId>mysql</groupId>
+		    <artifactId>mysql-connector-java</artifactId>
+		    <version>6.0.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+		<dependency>
+		    <groupId>org.mariadb.jdbc</groupId>
+		    <artifactId>mariadb-java-client</artifactId>
+		    <version>1.5.2</version>
 		</dependency>
   </dependencies> 
   <!-- 编译时按照UTF8字符编码build jar -->

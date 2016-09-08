@@ -1,6 +1,9 @@
 package cm.redis.storm.flushredis;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
@@ -180,8 +183,8 @@ public class Flush_Redis_DB {
 	 */
 	public static void update_g4jk_ref(String sjsn_id, String private_folder)
 	{
-		G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
-		g4jk_ref_Syn.ref_data_syn(sjsn_id, private_folder);
+			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+			g4jk_ref_Syn.ref_data_syn(sjsn_id, private_folder);
 	}
 	
 	/**
@@ -190,6 +193,10 @@ public class Flush_Redis_DB {
 	 */
 	public static void main(String[] args)
 	{
+		//测试代码段
+		//Flush_Redis_DB.flush_g4jk();
+		
+		//正式代码段
 		boolean cleanonce=false;
 		while(true)
 		{
@@ -204,9 +211,10 @@ public class Flush_Redis_DB {
 				    if(TimeFormatter.getHour().equals("03")==true){
 						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
 						// Flush_Redis_DB.flush_g4jk_ref();
-						// 获取接口数据，更新ref维表信息
-						Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
-						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
+						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
+						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
+						Flush_Redis_DB.update_g4jk_ref(null,"hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
+						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
 				    }
 				    cleanonce=true;
 				}
@@ -215,7 +223,7 @@ public class Flush_Redis_DB {
 				cleanonce=false;
 			}
 			
-			//负责推送mysql, 清理过期的redis统计数据，主要是G4的数据信息
+			//负责推送mysql
 			
 			
 			try{					

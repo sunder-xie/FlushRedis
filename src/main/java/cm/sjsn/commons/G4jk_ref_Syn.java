@@ -313,14 +313,64 @@ public class G4jk_ref_Syn {
 		}
 		
 		/**
+		 * 直接获取已经存在的维表数据文件
+		 * @param private_folder  private_folder 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的维表数据所在文件夹名称，最后不需要添加"/"
+		 * @return true表示存在文件，fasle表示文件不存在或者无效
+		 */
+		public boolean getreffilesdircetly(String private_folder){
+			boolean isgetfilesOK=false;
+			logger.info(" [get ref files directly method] starts");
+			extractedFiles=null;
+			String filepath=null;
+			try{
+				//仅处理private_folder下的维表文件，不处理文件夹
+				if(private_folder==null||private_folder.trim().equals(""))filepath=ResourcesConfig.SYN_SERVER_DATAFILE;
+				filepath=ResourcesConfig.SYN_SERVER_DATAFILE+private_folder+"/";
+				File file = new File(filepath);
+			    if (!file.exists()) {
+			    	logger.info(" [getreffilesdircetly method] has no files");
+			    	return false;
+			    }
+			    if (!file.isDirectory()) { 
+			    	logger.info(" [getreffilesdircetly method] not a directory");
+			    	return false;
+			    }
+			    String[] tempList = file.list();
+			    File temp = null;
+			    List<File> extractedFileList = new ArrayList<File>();
+			    for (int i = 0; i < tempList.length; i++) {
+			    	temp = new File(filepath + tempList[i]);  	//filepath已经带有File.separator
+			    	if (temp.isFile()) {
+			    		extractedFileList.add(temp);
+			    	}
+			    	if (temp.isDirectory())continue;
+			    }
+		        if(extractedFileList.size()>0){
+		        	extractedFiles = new File[extractedFileList.size()];  
+		        	extractedFileList.toArray(extractedFiles);
+		        	isgetfilesOK=true;
+		        	logger.info(" [getreffilesdircetly method] get " + extractedFileList.size() +" files");
+		        }else{
+		        	logger.info(" [unzipfile method] no files inside");
+		        }
+			    logger.info(" [getreffilesdircetly directly] ends successfully");
+			}catch(Exception ex){
+				logger.info(" [getreffilesdircetly method] runing error: "+ex.getMessage());
+				return false;
+			}
+			return isgetfilesOK;
+		}
+		
+		/**
 		 * 检查解压后的文件是否有实际数据维表信息
 		 * @param files 解压缩后的文件内容列表
 		 * @return 文件含有维表信息数据，返回true，否则返回false
 		 */
-		public boolean checkunzipfilerecords(File [] files)
+		public boolean checkreffilerecords(File [] files)
 		{
 			logger.info("[checkunzipfile method] starts");
 			boolean isfilecontaininfo=true;
+			if(files==null)return false;
 			try{
 				BufferedReader reader = null;
 				int line = 0; 
@@ -345,8 +395,9 @@ public class G4jk_ref_Syn {
 			return isfilecontaininfo;
 		}
 		
+		
 		/**
-		 * 录入解压缩后的文件到redis中
+		 * 录入解压缩后的文件或者已经存在的维表相关文件到redis中
 		 * @param files 解压缩后的文件内容列表
 		 */
 		public void processunzipfile(File [] files)
@@ -367,7 +418,8 @@ public class G4jk_ref_Syn {
 					String tempString = reader.readLine();//先读取第一行的数据
 					choose=0;
 					if(StringUtils.contains(tempString, "imsi"))choose=1; //读取imsi对应标签的维表
-					else if(StringUtils.contains(tempString, "hotsid"))choose=2;//读取tac ci对应的标签维表
+					else if(StringUtils.contains(tempString, "hotsid"))choose=2;//读取tac ci对应区域的标签维表
+					else if(StringUtils.contains(tempString, "tac_ci"))choose=3; //读取tac ci对应相同经纬度tac ci的翻译维表
 					while ((tempString = reader.readLine()) != null) {
 						// 以下则是逐行将数据做转换，录入redis数据库
 						recinfo=tempString.split(";"); //按照分号划分获取字段
@@ -380,6 +432,11 @@ public class G4jk_ref_Syn {
 							case 2: //hotsid tac ci对应维表
 								key="ref_"+recinfo[1]+"_"+recinfo[2];
 								value=recinfo[0];
+								redisserver.set(key, value);
+								break;
+							case 3: //tac_ci posid对应维表
+								key="ref_"+recinfo[0];
+								value=recinfo[1];
 								redisserver.set(key, value);
 								break;
 							default:
@@ -400,7 +457,7 @@ public class G4jk_ref_Syn {
 		/**
 		 * 更新4G网分维表信息-对外接口
 		 * @param sjsn_id 接口提供的id
-		 * @param private_folder 存放数据的对应文件夹名称，由用户自定义 最后不需要添加"/"，
+		 * @param private_folder 存放数据的对应文件夹名称，由用户自定义 最后不需要添加"/"
 		 */
 		public void ref_data_syn(String sjsn_id, String private_folder){
 			String url=null;
@@ -408,21 +465,30 @@ public class G4jk_ref_Syn {
 			Ftpfilebasicinfo ftpinfo=null;
 			File[] dlfiles=null;
 			boolean check=false;
-			
-			if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
-			
-			url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
-			json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
-			deletefiles(private_folder); 
-			ftpinfo=getfileinfo(url,json);
-			check=downloadfile(ftpinfo,private_folder);
-			if(check==true)
-			{
-				check=unzipfilewithpassword(ftpinfo, private_folder);
-				if(check==true){
+
+			if(sjsn_id==null||sjsn_id.trim().equals("")==true){
+				check=getreffilesdircetly(private_folder);
+				if(check==true)
+				{
 					dlfiles=getExtractedFiles();
-					check=checkunzipfilerecords(dlfiles);
-					//if(check==true)processunzipfile(dlfiles); 20160907由于维表数据尚未准备完毕，数据先不录入
+					check=checkreffilerecords(dlfiles);
+					if(check==true)processunzipfile(dlfiles);
+				}
+			}else{
+				if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
+				url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+				json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
+				deletefiles(private_folder); 
+				ftpinfo=getfileinfo(url,json);
+				check=downloadfile(ftpinfo,private_folder);
+				if(check==true)
+				{
+					check=unzipfilewithpassword(ftpinfo, private_folder);
+					if(check==true){
+						dlfiles=getExtractedFiles();
+						check=checkreffilerecords(dlfiles);
+						//if(check==true)processunzipfile(dlfiles); 20160907由于维表数据尚未准备完毕，数据先不录入
+					}
 				}
 			}
 		}
@@ -432,23 +498,25 @@ public class G4jk_ref_Syn {
 		 * @param args
 		 */
 		public static void main(String[] args){
-			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+//			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
 			
 			//测试接口下载文件，成功
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f",null);
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
 			//g4jk_ref_Syn.ref_data_syn("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
 			
-			//测试录入redis成功
-			File [] getFiles=null;
-			File refdata=null;
-			List<File> FileList = new ArrayList<File>();
-			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
-			FileList.add(refdata);
-			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
-			FileList.add(refdata);
-			getFiles=new File[FileList.size()];
-			FileList.toArray(getFiles);
-			g4jk_ref_Syn.processunzipfile(getFiles);
+//			//测试录入redis成功，可以用于手动导入维表信息
+//			File [] getFiles=null;
+//			File refdata=null;
+//			List<File> FileList = new ArrayList<File>();
+//			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
+//			FileList.add(refdata);
+//			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
+//			FileList.add(refdata);
+//			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
+//			FileList.add(refdata);
+//			getFiles=new File[FileList.size()];
+//			FileList.toArray(getFiles);
+//			g4jk_ref_Syn.processunzipfile(getFiles);
 		}
 }
