@@ -80,7 +80,6 @@ public class Flush_Redis_DB {
 			dt=null;
 			
 			logger.info(" Complete clear biglogs redis-keys, removes "+test_ip_num+" ip (out of date)");					
-			Thread.sleep(1000*60*60*11);
 		} catch (Exception e) {
 			logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 		}
@@ -91,7 +90,46 @@ public class Flush_Redis_DB {
 	 */
 	public static void flush_g4jk()
 	{
+		RedisServer redisserver=null;
+		TreeSet<String> keys=null; 
+		Iterator<String> keylist =null;
+		String date=null;
+		String key=null;
+		int num=0;
 		
+		//获取实例
+		redisserver=RedisServer.getInstance();
+
+		num=0;
+		logger.info(" Start to get g4jk storm-redis-keys");
+		
+		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
+		keys=redisserver.keys("mf*");  	//获取与大数据魔方实时展示相关的keys
+
+		//仅删除大数据魔方相关的过期数据
+		try {
+			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
+			keylist = keys.iterator();
+			while(keylist.hasNext())
+			{
+				key=keylist.next().toString();
+				if(StringUtils.contains(key, date)==false){
+					redisserver.del(key);
+					num+=1;
+				}
+			}
+			
+			//释放内存
+			redisserver=null;
+			date=null;
+			keys=null;
+			keylist=null;
+			key=null;
+			
+			logger.info(" Complete clear g4jk redis-keys, removes "+num+" g4 records (out of date)");					
+		} catch (Exception e) {
+			logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+		}
 	}
 	
 	/**
@@ -129,8 +167,7 @@ public class Flush_Redis_DB {
 			keylist=null;
 			key=null;
 			
-			logger.info(" Complete clear g4jk_ref redis-keys, removes "+num+" ref records (out of date)");					
-			Thread.sleep(1000*60*60*22);
+			logger.info(" Complete clear g4jk_ref redis-keys, removes "+num+" ref records (out of date)");
 		} catch (Exception e) {
 			logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 		}
@@ -153,30 +190,48 @@ public class Flush_Redis_DB {
 	 */
 	public static void main(String[] args)
 	{
+		boolean cleanonce=false;
 		while(true)
 		{
-			if(TimeFormatter.getHour().equals("02")==true||TimeFormatter.getHour().equals("14")==true)
+			//每天固定凌晨3点清理一次数据
+			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
 			{
-				// 每天凌晨 2 点与下午14点执行，负责清理大日志数据过期的实时信息
-				Flush_Redis_DB.flush_biglogs();
-				// 每天凌晨 2 点与下午14点执行，负责清理网分数据过期的实时信息
-				Flush_Redis_DB.flush_g4jk();
-			}else if(TimeFormatter.getHour().equals("03")==true){
-				// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
-				// Flush_Redis_DB.flush_g4jk_ref();
-				// 获取接口数据，更新ref维表信息
-				Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
-				Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
+				if(cleanonce==false){
+					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
+					Flush_Redis_DB.flush_biglogs();
+					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+					Flush_Redis_DB.flush_g4jk();
+				    if(TimeFormatter.getHour().equals("03")==true){
+						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
+						// Flush_Redis_DB.flush_g4jk_ref();
+						// 获取接口数据，更新ref维表信息
+						Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
+				    }
+				    cleanonce=true;
+				}
 			}
 			else	{
-				try{					
-					logger.info(" Storm-redis-cleaner is sleeping...zzz...");
-					Thread.sleep(1000*60*30);
-				}catch(Exception e)
-				{
-					logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
-				}
+				cleanonce=false;
+			}
+			
+			//负责推送mysql, 清理过期的redis统计数据，主要是G4的数据信息
+			
+			
+			try{					
+				Thread.sleep(1000*60*10);//休息10分钟
+			}catch(Exception e){
+				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 			}
 		}
 	}
 }
+
+
+//try{					
+//logger.info(" Storm-redis-cleaner is sleeping...zzz...");
+//Thread.sleep(1000*60*60);
+//}catch(Exception e)
+//{
+//logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+//}
