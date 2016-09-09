@@ -498,21 +498,21 @@ public class G4jk_ref_Syn {
 		 * @param args
 		 */
 		public static void main(String[] args){
-			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
-
-			//测试录入redis成功，可以用于手动导入维表信息
-			File [] getFiles=null;
-			File refdata=null;
-			List<File> FileList = new ArrayList<File>();
-			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
-			FileList.add(refdata);
-			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
-			FileList.add(refdata);
-			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
-			FileList.add(refdata);
-			getFiles=new File[FileList.size()];
-			FileList.toArray(getFiles);
-			g4jk_ref_Syn.processunzipfile(getFiles);
+//			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+//
+//			//测试录入redis成功，可以用于手动导入维表信息
+//			File [] getFiles=null;
+//			File refdata=null;
+//			List<File> FileList = new ArrayList<File>();
+//			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
+//			FileList.add(refdata);
+//			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
+//			FileList.add(refdata);
+//			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
+//			FileList.add(refdata);
+//			getFiles=new File[FileList.size()];
+//			FileList.toArray(getFiles);
+//			g4jk_ref_Syn.processunzipfile(getFiles);
 			
 			//测试接口下载文件，成功
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f",null);
