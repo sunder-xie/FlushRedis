@@ -11,8 +11,8 @@ import cm.redis.commons.TimeFormatter;
 import cm.sjsn.commons.G4jk_ref_Syn;
 
 /**
- * 用于删除redis中过期的数据
- * @author nicolashsu 2015-02-16
+ * 用于删除，更新redis中过期的数据
+ * @author nicolashsu 2016-09-08
  *
  */
 public class Flush_Redis_DB {
