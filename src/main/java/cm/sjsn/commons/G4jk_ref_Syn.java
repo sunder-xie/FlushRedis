@@ -425,17 +425,17 @@ public class G4jk_ref_Syn {
 						recinfo=tempString.split(";"); //按照分号划分获取字段
 						switch(choose){
 							case 1: //imsi对应维表
-								key="ref_"+recinfo[0];
+								key="ref_tag_"+recinfo[0];
 								value=recinfo[1];
 								redisserver.set(key, value);
 								break;
 							case 2: //hotsid tac ci对应维表
-								key="ref_"+recinfo[1]+"_"+recinfo[2];
+								key="ref_hsp_"+recinfo[1]+"_"+recinfo[2];
 								value=recinfo[0];
 								redisserver.set(key, value);
 								break;
 							case 3: //tac_ci posid对应维表
-								key="ref_"+recinfo[0];
+								key="ref_hpm_"+recinfo[0];
 								value=recinfo[1];
 								redisserver.set(key, value);
 								break;
