@@ -16,7 +16,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.SortingParams;
 
 /**
- * 2016-01-25 Jedis是2.8.0版本，对应的Redis服务器是3.0.6版本，用于构建cluster连接池与操作的封装类
+ * 2016-09-1 Jedis是2.9.0版本，对应的Redis服务器是3.2.3版本，用于构建cluster连接池与操作的封装类
  * @author nicolashsu
  *
  */
@@ -36,7 +36,7 @@ public class RedisServer {
 	private RedisServer()
 	{
 		Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
-		//Jedis Cluster will attempt to discover cluster nodes automatically
+		//只需要配置集群中的一个结点，连接成功后，自动获取点集群中其他结点信息
 		jedisClusterNodes.add(new HostAndPort(ResourcesConfig.REDIS_SERVER_IP, 
 				Integer.valueOf(ResourcesConfig.REDIS_SERVER_PORT)));
 		
@@ -64,10 +64,10 @@ public class RedisServer {
 		return INSTANCE;
 	}
 	
-	//关闭会话
+	//关闭会话，销毁jediscluster对象
 	public void close(){
 		 try {
-			if(jedisCluster!=null)jedisCluster.close();
+			 if(jedisCluster!=null)jedisCluster.close();
 		} catch (Exception e) {
 			logger.error("Close jediscluster error: ", e);  
 		}
@@ -81,7 +81,12 @@ public class RedisServer {
 	 */
 	public boolean exists(String key){
 		boolean exists=false;
-		exists=jedisCluster.exists(key);
+		try{
+			exists=jedisCluster.exists(key);
+		}catch (Exception e) {
+			logger.error("Jediscluster opt exists error: ", e); 
+			return false;
+		}
 		return exists;
 	}
 	
@@ -91,7 +96,14 @@ public class RedisServer {
 	 * @return 被删除的键的数目
 	 */
 	public long del(String key){
-		return jedisCluster.del(key);
+		long delnum=0;
+		try{
+			delnum= jedisCluster.del(key);
+		}catch (Exception e) {
+			logger.error("Jediscluster opt del error: ", e); 
+			return -1;
+		}
+		return delnum;
 	}
 	
 	/**
@@ -118,23 +130,38 @@ public class RedisServer {
     }  
 	/*通用key操作结束*/
 	
-	/*String操作*/
+	/*单值操作，可以是String，Float*/
 	/**
-	 * 添加string value值
+	 * 添加value值
 	 * @param key
 	 * @param value
+	 * @return 
 	 */
-	public void set(String key, String value){
-		jedisCluster.set(key, value);
+	public String set(String key, String value){
+		String setres=null;
+		try{
+			setres=jedisCluster.set(key, value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt set error: ", e);
+			return null;
+		}
+		return setres;
 	}
 	
 	/**
-	 * 返回string value值
+	 * 返回value值
 	 * @param key
 	 * @return
 	 */
 	public String get(String key){
-		return jedisCluster.get(key);
+		String getstr=null;
+		try{
+			getstr= jedisCluster.get(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt get error: ", e);
+			return null;
+		}
+		return getstr;
 	}
 	
 	/**
@@ -143,7 +170,31 @@ public class RedisServer {
 	 * @return 返回最新的自增值
 	 */
 	public long incr(String key){
-		return jedisCluster.incr(key);
+		long incr1=0;
+		try{
+			incr1= jedisCluster.incr(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt incr error: ", e);
+			return -1;
+		}
+		return incr1;
+	}
+	
+	/**
+	 * 对键值进行自增浮点数计数，将指定主键key的value值加上浮点数，如果key本身不存在，会新增0并加上value
+	 * @param key
+	 * @param 
+	 * @return 返回最新的自增值
+	 */
+	public Double incrbyfloat(String key,double value){
+		double incrdoub=0.0;
+		try{
+			incrdoub=jedisCluster.incrByFloat(key, value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt incrbyfloat error: ", e);
+			return -1.0;
+		}
+		return incrdoub;
 	}
 	/*String操作结束*/
 	
@@ -152,18 +203,34 @@ public class RedisServer {
 	 * 从list左边插入数值，如果key值不存在，会自动创建并添加元素
 	 * @param key
 	 * @param value
+	 * @return 返回插入后的元素个数
 	 */
-	public void lpush(String key,String value){
-		jedisCluster.lpush(key, value);
+	public long lpush(String key,String value){
+		long listnum=0;
+		try{
+			listnum=jedisCluster.lpush(key, value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt lpush error: ", e);
+			return -1;
+		}
+		return listnum;
 	}
 	
 	/**
 	 * 从list右边插入数据，如果key值不存在，会自动创建并添加元素
 	 * @param key
 	 * @param value
+	 * @return 返回插入后的元素个数
 	 */
-	public void rpush(String key,String value){
-		jedisCluster.rpush(key, value);
+	public long rpush(String key,String value){
+		long listnum=0;
+		try{
+			listnum=jedisCluster.rpush(key, value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt rpush error: ", e);
+			return -1;
+		}
+		return listnum;
 	}
 	
 	/**
@@ -173,7 +240,14 @@ public class RedisServer {
 	 * @return 弹出的值，key不存在返回null
 	 */
 	public String lpop(String key){
-		return jedisCluster.lpop(key);
+		String popelement=null;
+		try{
+			popelement= jedisCluster.lpop(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt lpop error: ", e);
+			return null;
+		}
+		return popelement;	
 	}
 	
 	/**
@@ -183,7 +257,14 @@ public class RedisServer {
 	 * @return 弹出的值，key不存在返回null
 	 */
 	public String rpop(String key){
-		return jedisCluster.rpop(key);
+		String popelement=null;
+		try{
+			popelement=  jedisCluster.rpop(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt rpop error: ", e);
+			return null;
+		}
+		return popelement;
 	}
 	
 	/**
@@ -191,10 +272,17 @@ public class RedisServer {
 	 * @param key
 	 * @param start 起始位置，从0开始
 	 * @param end -1代表数组最末位置，否则表示结束位置，从0开始计算
-	 * @return
+	 * @return 区间结果集合
 	 */
-	public List<String> lrange(String key,long start, long end){ 
-		return jedisCluster.lrange(key, start, end);
+	public List<String> lrange(String key,long start, long end){
+		List<String> rangres=null;
+		try{
+			rangres=jedisCluster.lrange(key, start, end);
+		}catch(Exception e){
+			logger.error("Jediscluster opt lrange error: ", e);
+			return null;
+		}
+		return rangres;
 	}
 	
 	/*list操作封装结束*/
@@ -205,8 +293,15 @@ public class RedisServer {
 	 * @param key
 	 * @param value
 	 */
-	public void sadd(String key, String value){
-		jedisCluster.sadd(key,value);
+	public long sadd(String key, String value){
+		long res=0;
+		try{
+			res=jedisCluster.sadd(key,value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt sadd error: ", e);
+			return -1;
+		}
+		return res;
 	}
 	/*set集合操作封装结束*/
 	
@@ -219,7 +314,14 @@ public class RedisServer {
 	 */
 	public boolean hexists(String key, String field)
 	{
-		return jedisCluster.hexists(key, field);
+		boolean res=false;
+		try{
+			res=jedisCluster.hexists(key, field);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hexists error: ", e);
+			return false;
+		}
+		return res;
 	}
 	
 	/**
@@ -229,60 +331,104 @@ public class RedisServer {
 	 * @param field
 	 * @param value
 	 */
-	public void hset(String key, String field, String value)
+	public long hset(String key, String field, String value)
 	{
-		jedisCluster.hset(key, field, value);
+		long res=0;
+		try{
+			res=jedisCluster.hset(key, field, value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hset error: ", e);
+			return -1;
+		}
+		return res;
 	}
 	
 	/**
 	 * 设置哈希表中的字段及对应的值
 	 * @param key
 	 * @param field_value,哈希键值数组
+	 * @return res 返回结果OK或者意外情况Exception
 	 */
-	public void hmset(String key, Map<String, String> field_value)
+	public String hmset(String key, Map<String, String> field_value)
 	{
-		jedisCluster.hmset(key, field_value);
+		String res = null;
+		try{
+			res = jedisCluster.hmset(key, field_value);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hmset error: ", e);
+			return null;
+		}
+		return res;
 	}
 	
 	/**
 	 * 获取哈希表中域的值
 	 * @param key
 	 * @param field
-	 * @return 如果key或者field不存在，结果返回为null
+	 * @return 如果key或者field不存在，结果返回为nil字符串，出错返回null
 	 */
 	public String hget(String key, String field)
 	{
-		return jedisCluster.hget(key, field);
+		String res = null;
+		try{
+			res=jedisCluster.hget(key, field);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hget error: ", e);
+			return null;
+		}
+		return res;
 	}
 	
 	/**
 	 * 获取hash key对应的所有feild和value对
 	 * @param key
-	 * @return
+	 * @return res 返回所有的内容
 	 */
 	public Map<String, String> hgetall(String key)
 	{
-		return jedisCluster.hgetAll(key);
+		Map<String, String> res =null;
+		try{
+			res =jedisCluster.hgetAll(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hgetall error: ", e);
+			return null;
+		}
+		return res;
 	}
 	
 	/**
 	 * 获取hash中key下对应的所有域fields
 	 * @param key
-	 * @return
+	 * @return res 所有fields
 	 */
 	public Set<String> hkeys(String key)
 	{
-		return jedisCluster.hkeys(key);
+		Set<String> res =null;
+		try{
+			res = jedisCluster.hkeys(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hkeys error: ", e);
+			return null;
+		}
+		return res;
 	}
 	
 	/**
 	 * 删除hash中key对应的field
 	 * @param key
 	 * @param field
+	 * @return res 删除成功1，无删除0，出错-1
 	 */
-	public void hdel(String key, String field)
+	public long hdel(String key, String field)
 	{
-		jedisCluster.hdel(key, field);
+		long res=0;
+		try{
+			res=jedisCluster.hdel(key, field);
+		}catch(Exception e){
+			logger.error("Jediscluster opt hdel error: ", e);
+			return -1;
+		}
+		return res;
 	}
 	/*hash散列操作封装结束*/
 	
@@ -294,7 +440,14 @@ public class RedisServer {
 	 */
 	public List<String> redis_sort1(String key)
 	{
-		return jedisCluster.sort(key);
+		List<String> res=null;
+		try{
+			res= jedisCluster.sort(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt redis_sort1 error: ", e);
+			return null;
+		}
+		return res;
 	}
 	
 	/**
@@ -305,7 +458,14 @@ public class RedisServer {
 	 */
 	public List<String> redis_sort2(String key, SortingParams sortingParameters)
 	{
-		return jedisCluster.sort(key, sortingParameters);
+		List<String> res=null;
+		try{
+			res= jedisCluster.sort(key, sortingParameters);
+		}catch(Exception e){
+			logger.error("Jediscluster opt redis_sort1 error: ", e);
+			return null;
+		}
+		return res;
 	}
 	/*排序操作封装结束*/
 	
