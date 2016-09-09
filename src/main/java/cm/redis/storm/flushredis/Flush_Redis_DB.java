@@ -219,13 +219,9 @@ public class Flush_Redis_DB {
 			else	{
 				cleanonce=false;
 			}
-			
-			//定时从redis上抓取最新的数据信息进行推送
-			
-			
-			
+					
 			try{					
-				Thread.sleep(1000*60*10);//休息10分钟
+				Thread.sleep(1000*60*60*6);//休息6小时
 			}catch(Exception e){
 				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 			}
