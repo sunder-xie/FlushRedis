@@ -500,7 +500,7 @@ public class G4jk_ref_Syn {
 		public static void main(String[] args){
 			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
 
-//			//测试录入redis成功，可以用于手动导入维表信息
+			//测试录入redis成功，可以用于手动导入维表信息
 			File [] getFiles=null;
 			File refdata=null;
 			List<File> FileList = new ArrayList<File>();

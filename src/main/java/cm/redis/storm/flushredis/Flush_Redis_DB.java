@@ -113,10 +113,10 @@ public class Flush_Redis_DB {
 			while(keylist.hasNext())
 			{
 				key=keylist.next().toString();
-				//if(StringUtils.contains(key, date)==false){
+				if(StringUtils.contains(key, date)==false){
 					redisserver.del(key);
 					num+=1;
-				//}
+				}
 			}
 			
 			//释放内存
