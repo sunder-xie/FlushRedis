@@ -113,10 +113,10 @@ public class Flush_Redis_DB {
 			while(keylist.hasNext())
 			{
 				key=keylist.next().toString();
-				if(StringUtils.contains(key, date)==false){
+				//if(StringUtils.contains(key, date)==false){
 					redisserver.del(key);
 					num+=1;
-				}
+				//}
 			}
 			
 			//释放内存
@@ -192,6 +192,7 @@ public class Flush_Redis_DB {
 	{
 		//测试代码段
 		//Flush_Redis_DB.flush_g4jk();
+		//Flush_Redis_DB.flush_g4jk_ref();
 		
 		//正式代码段
 		boolean cleanonce=false;

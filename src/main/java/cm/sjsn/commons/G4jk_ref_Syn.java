@@ -425,7 +425,7 @@ public class G4jk_ref_Syn {
 						recinfo=tempString.split(";"); //按照分号划分获取字段
 						switch(choose){
 							case 1: //imsi对应维表
-								key="ref_tag_"+recinfo[0];
+								key="ref_tags_"+recinfo[0];
 								value=recinfo[1];
 								redisserver.set(key, value);
 								break;
@@ -498,25 +498,25 @@ public class G4jk_ref_Syn {
 		 * @param args
 		 */
 		public static void main(String[] args){
-//			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+
+//			//测试录入redis成功，可以用于手动导入维表信息
+			File [] getFiles=null;
+			File refdata=null;
+			List<File> FileList = new ArrayList<File>();
+			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
+			FileList.add(refdata);
+			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
+			FileList.add(refdata);
+			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
+			FileList.add(refdata);
+			getFiles=new File[FileList.size()];
+			FileList.toArray(getFiles);
+			g4jk_ref_Syn.processunzipfile(getFiles);
 			
 			//测试接口下载文件，成功
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f",null);
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
 			//g4jk_ref_Syn.ref_data_syn("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
-			
-//			//测试录入redis成功，可以用于手动导入维表信息
-//			File [] getFiles=null;
-//			File refdata=null;
-//			List<File> FileList = new ArrayList<File>();
-//			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
-//			FileList.add(refdata);
-//			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
-//			FileList.add(refdata);
-//			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
-//			FileList.add(refdata);
-//			getFiles=new File[FileList.size()];
-//			FileList.toArray(getFiles);
-//			g4jk_ref_Syn.processunzipfile(getFiles);
 		}
 }
