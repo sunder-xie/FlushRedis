@@ -1,9 +1,6 @@
 package cm.redis.storm.flushredis;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
@@ -223,7 +220,8 @@ public class Flush_Redis_DB {
 				cleanonce=false;
 			}
 			
-			//负责推送mysql
+			//定时从redis上抓取最新的数据信息进行推送
+			
 			
 			
 			try{					

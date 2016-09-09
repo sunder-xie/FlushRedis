@@ -26,5 +26,9 @@ public class ResourcesConfig {
 	public final static String SYN_SERVER_DATAFILE="/home/storm/netantdata/ref/";  //正式服务器地址
 	//public final static String SYN_SERVER_DATAFILE="E:/";  					//测试地址
 	
-	
+//	public final static String MYSQL_SERVER_IP="10.245.254.55";		//mysql数据库入口ip
+//	public final static String MYSQL_SERVER_PORT="8066";				    //数据库端口
+//	public final static String MYSQL_DATABASE="dtdb";						//数据库
+//	public final static String MYSQL_USER="stdt";								//mysql用户名
+//	public final static String MYSQL_PASSWD="ST.dt.0505.903";			//mysql密码
 }
