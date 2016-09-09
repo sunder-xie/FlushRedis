@@ -221,7 +221,7 @@ public class Flush_Redis_DB {
 			}
 					
 			try{					
-				Thread.sleep(1000*60*60*6);//休息6小时
+				Thread.sleep(1000*60*60);//休息1小时
 			}catch(Exception e){
 				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 			}
