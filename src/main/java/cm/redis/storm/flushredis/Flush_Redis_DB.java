@@ -41,34 +41,60 @@ public class Flush_Redis_DB {
 		logger.info(" Start to get biglogs storm-redis-keys");
 		
 		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
-		keys=redisserver.keys("*"); 		//获取所有的keys
-
+		
 		//仅删除大日志相关的数据
 		try {
 			logger.info(" Start to clear biglogs storm-redis-keys which are out of date!!!");
-			keylist = keys.iterator();
-			while(keylist.hasNext())
-			{
-				key=keylist.next().toString();
-				if(StringUtils.contains(key, "src_date")==false && StringUtils.contains(key, "dst_date")==false ){
-					if(StringUtils.contains(key, date)==false&&
-					(StringUtils.startsWith(key, "src")==true||StringUtils.startsWith(key, "dst")==true)){
-						redisserver.del(key);
-						test_ip_num+=1;
-					}
-				}
-				else{
-					dt=redisserver.get(key);
-					if(dt!=null)
-					{
-						if(StringUtils.equals(dt, date)==false){
+			keys=redisserver.keys("src*"); 		//获取所有的src keys
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					if(StringUtils.contains(key, "src_date")==false){
+						if(StringUtils.contains(key, date)==false){
 							redisserver.del(key);
 							test_ip_num+=1;
 						}
 					}
-				}
+					else{
+						dt=redisserver.get(key);
+						if(dt!=null)
+						{
+							if(StringUtils.equals(dt, date)==false){
+								redisserver.del(key);
+								test_ip_num+=1;
+							}
+						}
+					}
+				}				
 			}
-
+			
+			keys=redisserver.keys("dst*"); 		//获取所有的dst keys
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					if(StringUtils.contains(key, "dst_date")==false ){
+						if(StringUtils.contains(key, date)==false){
+							redisserver.del(key);
+							test_ip_num+=1;
+						}
+					}
+					else{
+						dt=redisserver.get(key);
+						if(dt!=null)
+						{
+							if(StringUtils.equals(dt, date)==false){
+								redisserver.del(key);
+								test_ip_num+=1;
+							}
+						}
+					}
+				}				
+			}
+			
 			test_ip_num=test_ip_num/5;
 			
 			//释放内存
@@ -104,18 +130,21 @@ public class Flush_Redis_DB {
 		logger.info(" Start to get g4jk storm-redis-keys");
 		
 		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
-		keys=redisserver.keys("mf*");  	//获取与大数据魔方实时展示相关的keys
+		
 
 		//仅删除大数据魔方相关的过期数据
 		try {
 			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
-			keylist = keys.iterator();
-			while(keylist.hasNext())
-			{
-				key=keylist.next().toString();
-				if(StringUtils.contains(key, date)==false){
-					redisserver.del(key);
-					num+=1;
+			keys=redisserver.keys("mf*");  	//获取与大数据魔方实时展示相关的keys
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					if(StringUtils.contains(key, date)==false){
+						redisserver.del(key);
+						num+=1;
+					}
 				}
 			}
 			
@@ -148,17 +177,18 @@ public class Flush_Redis_DB {
 
 		num=0;
 		logger.info(" Start to get g4jk_ref storm-redis-keys");
-		
-		keys=redisserver.keys("ref*"); 		//获取所有的ref 相关的keys
 
 		try {
 			logger.info(" Start to clear g4jk_ref storm-redis-keys which are out of date!!!");
-			keylist = keys.iterator();
-			while(keylist.hasNext())
-			{
-				key=keylist.next().toString();
-				redisserver.del(key);
-				num+=1;
+			keys=redisserver.keys("ref*"); 		//获取所有的ref 相关的keys
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					redisserver.del(key);
+					num+=1;
+				}
 			}
 			
 			//释放内存
