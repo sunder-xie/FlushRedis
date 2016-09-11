@@ -54,7 +54,6 @@ public class RedisServer {
         config.setNumTestsPerEvictionRun(ResourcesConfig.NumTestsPerEvictionRun);
         config.setMinEvictableIdleTimeMillis(ResourcesConfig.TimeBetweenEvictionRunsMillis);
         
-        
         //新建JedisCluster连接
         jedisCluster=new JedisCluster(jedisClusterNodes,
         		ResourcesConfig.CLUSTER_TIMEOUT,
@@ -132,7 +131,7 @@ public class RedisServer {
                 logger.info(" Getting keys error: ", e);  
             } finally{  
                 logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
-                connection.close();//用完一定要close这个链接！！！  
+                connection.close();//用完一定要close这个链接！！！
             }  
         }  
         return keys;  
@@ -301,6 +300,7 @@ public class RedisServer {
 	 * 添加set元素操作
 	 * @param key
 	 * @param value
+	 * @return 1添加成功，0已经存在，-1存在错误
 	 */
 	public long sadd(String key, String value){
 		long res=0;
@@ -312,6 +312,40 @@ public class RedisServer {
 		}
 		return res;
 	}
+	
+	/**
+	 * 获取set元素数量
+	 * @param key
+	 * @return 元素数量 -1表示出错
+	 */
+	public long scard(String key){
+		long res=0;
+		try{
+			res=jedisCluster.scard(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt scard error: ", e);
+			return -1;
+		}
+		return res;
+	}
+	
+	/**
+	 * 获取set的全部元素值集合
+	 * @param key set的key
+	 * @return 返回Set<String>集合
+	 */
+	public Set<String> smembers(String key){
+		Set<String> res=null;
+		try{
+			res=jedisCluster.smembers(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt smembers error: ", e);
+			return null;
+		}
+		return res;
+		
+	}
+	
 	/*set集合操作封装结束*/
 	
 	/*hash散列操作封装*/
