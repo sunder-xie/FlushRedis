@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import cm.redis.commons.ResourcesConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -44,15 +45,11 @@ public class RedisServer {
 		JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(ResourcesConfig.MAX_ACTIVE);
         config.setMaxIdle(ResourcesConfig.MAX_IDLE);
+        config.setMinIdle(ResourcesConfig.MIN_IDLE);
+        config.setBlockWhenExhausted(ResourcesConfig.Block_Exhausted);
         config.setMaxWaitMillis(ResourcesConfig.MAX_WAIT);
         config.setTestOnBorrow(ResourcesConfig.TEST_ON_BORROW);
         config.setTestOnReturn(ResourcesConfig.TEST_ON_RETURN);
-        config.setBlockWhenExhausted(ResourcesConfig.Block_Exhausted);
-        config.setMaxWaitMillis(ResourcesConfig.Max_WaitMillis);
-        config.setTestWhileIdle(ResourcesConfig.TEST_WHILE_IDEL); 
-        config.setTimeBetweenEvictionRunsMillis(ResourcesConfig.TimeBetweenEvictionRunsMillis);
-        config.setNumTestsPerEvictionRun(ResourcesConfig.NumTestsPerEvictionRun);
-        config.setMinEvictableIdleTimeMillis(ResourcesConfig.TimeBetweenEvictionRunsMillis);
         
         //新建JedisCluster连接
         jedisCluster=new JedisCluster(jedisClusterNodes,
