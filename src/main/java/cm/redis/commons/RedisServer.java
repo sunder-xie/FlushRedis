@@ -38,11 +38,7 @@ public class RedisServer {
 	{
 		Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
 		//只需要配置集群中的一个结点，连接成功后，自动获取点集群中其他结点信息
-		jedisClusterNodes.add(new HostAndPort(ResourcesConfig.REDIS_SERVER_IP1, 
-				Integer.valueOf(ResourcesConfig.REDIS_SERVER_PORT)));
-		jedisClusterNodes.add(new HostAndPort(ResourcesConfig.REDIS_SERVER_IP2, 
-				Integer.valueOf(ResourcesConfig.REDIS_SERVER_PORT)));
-		jedisClusterNodes.add(new HostAndPort(ResourcesConfig.REDIS_SERVER_IP3, 
+		jedisClusterNodes.add(new HostAndPort(ResourcesConfig.REDIS_SERVER_IP, 
 				Integer.valueOf(ResourcesConfig.REDIS_SERVER_PORT)));
 		
 		//构建Cluster的连接池配置参数
