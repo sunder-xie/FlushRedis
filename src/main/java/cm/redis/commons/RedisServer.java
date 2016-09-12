@@ -72,7 +72,7 @@ public class RedisServer {
 	}
 	
 	//关闭会话，销毁jediscluster对象
-	public void close(){
+	public static void close(){
 		 try {
 			 if(jedisCluster!=null)jedisCluster.close();
 		} catch (Exception e) {
