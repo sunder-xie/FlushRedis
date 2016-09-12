@@ -12,7 +12,7 @@ public class ResourcesConfig {
 	public final static String SYSTEM_COPYRIGHT="中国移动通信集团广东有限公司汕头分公司业务支持中心运营管理室";
 	
 	// redis集群数据库的数据库连接池配置信息，入口ip和端口
-	public final static int MAX_ACTIVE = 500;		 								//可用连接实例的最大数目，默认值为8；如果赋值为-1，则表示不限制；如果pool已经分配了maxActive个jedis实例，则此时pool的状态为exhausted(耗尽)。
+	public final static int MAX_ACTIVE = 100;		 								//可用连接实例的最大数目，默认值为8；如果赋值为-1，则表示不限制；如果pool已经分配了maxActive个jedis实例，则此时pool的状态为exhausted(耗尽)。
 	public final static int MAX_IDLE = 10;			 								//控制一个pool最多有多少个状态为idle(空闲的)的jedis实例，默认值是8。空闲代表可以复用。
 	public final static int MIN_IDLE = 5;												//控制一个pool最少有多少个状态为idle
 	public final static boolean Block_Exhausted=true;						//启用阻塞等待机制
