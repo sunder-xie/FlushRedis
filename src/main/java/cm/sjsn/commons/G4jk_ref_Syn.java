@@ -444,6 +444,7 @@ public class G4jk_ref_Syn {
 								key="ref_wtag_"+recinfo[0];
 								value=recinfo[1];
 								redisserver.set(key, value);
+								break;
 							default:
 								logger.info(" [processunzipfile method] no import method for current ref file to Redis.");
 								break;
