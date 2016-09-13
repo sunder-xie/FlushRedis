@@ -243,6 +243,7 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
 						Flush_Redis_DB.update_g4jk_ref(null,"hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
 						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
+						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
 				    }
 				    cleanonce=true;
 				}
