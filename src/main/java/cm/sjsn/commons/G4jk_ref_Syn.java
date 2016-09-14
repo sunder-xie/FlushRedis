@@ -516,6 +516,8 @@ public class G4jk_ref_Syn {
 //			FileList.add(refdata);
 //			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
 //			FileList.add(refdata);
+//			refdata=new File("E:/WorkSpace/tb_mofang_webtag_ref.txt");
+//			FileList.add(refdata);
 //			getFiles=new File[FileList.size()];
 //			FileList.toArray(getFiles);
 //			g4jk_ref_Syn.processunzipfile(getFiles);
