@@ -241,7 +241,7 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.flush_g4jk_ref();
 						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
 						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
-						Flush_Redis_DB.update_g4jk_ref(null,"hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
 						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
 						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
 				    }

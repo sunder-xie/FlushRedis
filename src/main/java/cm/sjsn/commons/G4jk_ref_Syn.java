@@ -430,9 +430,9 @@ public class G4jk_ref_Syn {
 								value=recinfo[1];
 								redisserver.set(key, value);
 								break;
-							case 2: //hotsid tac ci对应维表
-								key="ref_hsp_"+recinfo[1]+"_"+recinfo[2];
-								value=recinfo[0];
+							case 2: //hotsid tac ci对应维表，接口读取过来的数据 3 hotspot id, 4 tac, 5 ci
+								key="ref_hsp_"+recinfo[4]+"_"+recinfo[5];
+								value=recinfo[3];
 								redisserver.set(key, value);
 								break;
 							case 3: //tac_ci posid对应维表
@@ -493,7 +493,7 @@ public class G4jk_ref_Syn {
 					if(check==true){
 						dlfiles=getExtractedFiles();
 						check=checkreffilerecords(dlfiles);
-						//if(check==true)processunzipfile(dlfiles); 20160907由于维表数据尚未准备完毕，数据先不录入
+						if(check==true)processunzipfile(dlfiles); //
 					}
 				}
 			}
