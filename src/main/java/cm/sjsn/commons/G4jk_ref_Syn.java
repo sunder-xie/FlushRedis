@@ -426,23 +426,23 @@ public class G4jk_ref_Syn {
 						recinfo=tempString.split(";"); //按照分号划分获取字段
 						switch(choose){
 							case 1: //imsi对应维表
-								key="ref_tags_"+recinfo[0];
-								value=recinfo[1];
+								key="ref_tags_"+recinfo[0].trim();
+								value=recinfo[1].trim();
 								redisserver.set(key, value);
 								break;
 							case 2: //hotsid tac ci对应维表，接口读取过来的数据 3 hotspot id, 4 tac, 5 ci
-								key="ref_hsp_"+recinfo[4]+"_"+recinfo[5];
-								value=recinfo[3];
+								key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
+								value=recinfo[3].trim();
 								redisserver.set(key, value);
 								break;
 							case 3: //tac_ci posid对应维表
-								key="ref_hpm_"+recinfo[0];
-								value=recinfo[1];
+								key="ref_hpm_"+recinfo[0].trim();
+								value=recinfo[1].trim();
 								redisserver.set(key, value);
 								break;
 							case 4: //subid webtag 大类英文维表
-								key="ref_wtag_"+recinfo[0];
-								value=recinfo[1];
+								key="ref_wtag_"+recinfo[0].trim();
+								value=recinfo[1].trim();
 								redisserver.set(key, value);
 								break;
 							default:
