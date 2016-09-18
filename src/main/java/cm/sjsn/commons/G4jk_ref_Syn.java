@@ -435,7 +435,7 @@ public class G4jk_ref_Syn {
 								if(key.equals("0")==true)recinfo[5]="none";
 								key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
 								value=recinfo[3].trim();
-								redisserver.set(key, value);
+								redisserver.sadd(key, value);
 								break;
 							case 3: //tac_ci posid对应维表
 								key="ref_hpm_"+recinfo[0].trim();
