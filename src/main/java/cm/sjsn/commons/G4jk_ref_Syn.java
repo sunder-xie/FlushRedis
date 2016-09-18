@@ -508,13 +508,13 @@ public class G4jk_ref_Syn {
 		public static void main(String[] args){
 //			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
 //
-//			//测试录入redis成功，可以用于手动导入维表信息
+			//测试录入redis成功，可以用于手动导入维表信息
 //			File [] getFiles=null;
 //			File refdata=null;
 //			List<File> FileList = new ArrayList<File>();
 //			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
 //			FileList.add(refdata);
-//			refdata=new File("E:/WorkSpace/tb_mofang_hotspot_ref.txt");
+//			refdata=new File("E:/WorkSpace/data.txt");//tb_mofang_hotspot_ref.txt
 //			FileList.add(refdata);
 //			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
 //			FileList.add(refdata);
