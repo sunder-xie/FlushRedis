@@ -130,7 +130,6 @@ public class Flush_Redis_DB {
 		logger.info(" Start to get g4jk storm-redis-keys");
 		
 		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
-		
 
 		//仅删除大数据魔方相关的过期数据
 		try {
