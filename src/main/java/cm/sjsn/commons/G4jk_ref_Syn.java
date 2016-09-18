@@ -431,6 +431,8 @@ public class G4jk_ref_Syn {
 								redisserver.set(key, value);
 								break;
 							case 2: //hotsid tac ci对应维表，接口读取过来的数据 3 hotspot id, 4 tac, 5 ci
+								key=recinfo[5].trim();
+								if(key.equals("0")==true)recinfo[5]="none";
 								key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
 								value=recinfo[3].trim();
 								redisserver.set(key, value);
