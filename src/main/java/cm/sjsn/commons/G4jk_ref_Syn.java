@@ -436,6 +436,8 @@ public class G4jk_ref_Syn {
 								key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
 								value=recinfo[3].trim();
 								redisserver.sadd(key, value);
+								key="ref_hsp_set"; //整理出所有项目，当天最新的全部热点区域
+								redisserver.sadd(key, value);
 								break;
 							case 3: //tac_ci posid对应维表
 								key="ref_hpm_"+recinfo[0].trim();
