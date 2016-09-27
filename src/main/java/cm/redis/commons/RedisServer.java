@@ -49,7 +49,8 @@ public class RedisServer {
 //        config.setTestOnBorrow(ResourcesConfig.TEST_ON_BORROW);
         
         //新建JedisCluster连接
-		jedisCluster=new JedisCluster(jedisClusterNodes);
+		jedisCluster=new JedisCluster(jedisClusterNodes,ResourcesConfig.CLUSTER_TIMEOUT,
+        		ResourcesConfig.CLUSTER_MAX_REDIRECTIONS);
 //        jedisCluster=new JedisCluster(jedisClusterNodes,
 //        		ResourcesConfig.CLUSTER_TIMEOUT,
 //        		ResourcesConfig.CLUSTER_MAX_REDIRECTIONS, 
