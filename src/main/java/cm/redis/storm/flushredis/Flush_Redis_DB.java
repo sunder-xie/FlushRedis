@@ -45,7 +45,7 @@ public class Flush_Redis_DB {
 		//仅删除大日志相关的数据
 		try {
 			logger.info(" Start to clear biglogs storm-redis-keys which are out of date!!!");
-			keys=redisserver.keys("src*"); 		//获取所有的src keys
+			keys=redisserver.scan("src*"); 		//获取所有的src keys
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -70,7 +70,7 @@ public class Flush_Redis_DB {
 				}				
 			}
 			
-			keys=redisserver.keys("dst*"); 		//获取所有的dst keys
+			keys=redisserver.scan("dst*"); 		//获取所有的dst keys
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -134,7 +134,7 @@ public class Flush_Redis_DB {
 		//仅删除大数据魔方相关的过期数据
 		try {
 			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
-			keys=redisserver.keys("mfg4*");  	//获取与大数据魔方实时展示相关的keys
+			keys=redisserver.scan("mfg4*");  	//获取与大数据魔方实时展示相关的keys
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -179,7 +179,7 @@ public class Flush_Redis_DB {
 
 		try {
 			logger.info(" Start to clear g4jk_ref storm-redis-keys which are out of date!!!");
-			keys=redisserver.keys("ref*"); 		//获取所有的ref 相关的keys
+			keys=redisserver.scan("ref*"); 		//获取所有的ref 相关的keys
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())

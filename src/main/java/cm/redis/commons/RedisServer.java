@@ -13,6 +13,8 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 //import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.SortingParams;
 
@@ -131,7 +133,45 @@ public class RedisServer {
             }  
         }  
         return keys;  
-    }  
+    }
+	
+	/**
+	 * 游标方式获取对应的key，比keys操作更加节省资源，便于使用
+	 * @param cursor 游标，初始为0，最后返回为0，则表示遍历完成
+	 * @param params 游标对应的匹配参数包括count和match
+	 * @return
+	 */
+	public TreeSet<String> scan(String pattern){
+		TreeSet<String> keys = new TreeSet<String>();
+		ScanResult<String> scankey=null;
+		String cursor=null;
+		ScanParams params=new ScanParams();
+
+        for(String k : clusterNodes.keySet()){  
+            JedisPool jp = clusterNodes.get(k);  
+            Jedis connection = jp.getResource();  
+            try {
+            	cursor="0";
+            	params.match(pattern);
+            	params.count(50);
+            	do{
+            		scankey=connection.scan(cursor, params);
+            		if(scankey!=null)
+            		{
+            			cursor=scankey.getStringCursor();
+            			keys.addAll(scankey.getResult());
+            		}
+            	}while(cursor.equals("0")==false); 
+                logger.info(" Get keys from"+connection.getClient().getHost() +":"+connection.getClient().getPort());
+            } catch(Exception e){  
+                logger.info(" Getting keys error: ", e);  
+            } finally{  
+                logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
+                connection.close();//用完一定要close这个链接！！！
+            }  
+        }  
+        return keys;  
+	}
 	/*通用key操作结束*/
 	
 	/*单值操作，可以是String，Float*/
