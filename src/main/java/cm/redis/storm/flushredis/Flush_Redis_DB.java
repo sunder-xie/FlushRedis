@@ -220,43 +220,43 @@ public class Flush_Redis_DB {
 	public static void main(String[] args)
 	{
 		//测试代码段
-		Flush_Redis_DB.flush_g4jk();
+//		Flush_Redis_DB.flush_g4jk();
 //		Flush_Redis_DB.flush_g4jk_ref();
 		
 		//正式代码段
-//		boolean cleanonce=false;
-//		while(true)
-//		{
-//			//每天固定凌晨3点清理一次数据
-//			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
-//			{
-//				if(cleanonce==false){
-//					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
-//					Flush_Redis_DB.flush_biglogs();
-//					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
-//					Flush_Redis_DB.flush_g4jk();
-//				    if(TimeFormatter.getHour().equals("03")==true){
-//						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
-//						Flush_Redis_DB.flush_g4jk_ref();
-//						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
-//						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
-//						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
-//						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
-//						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
-//				    }
-//				    cleanonce=true;
-//				}
-//			}
-//			else	{
-//				cleanonce=false;
-//			}
-//					
-//			try{					
-//				Thread.sleep(1000*60*60);//休息1小时
-//			}catch(Exception e){
-//				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
-//			}
-//		}
+		boolean cleanonce=false;
+		while(true)
+		{
+			//每天固定凌晨3点清理一次数据
+			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
+			{
+				if(cleanonce==false){
+					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
+					Flush_Redis_DB.flush_biglogs();
+					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+					Flush_Redis_DB.flush_g4jk();
+				    if(TimeFormatter.getHour().equals("03")==true){
+						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
+						Flush_Redis_DB.flush_g4jk_ref();
+						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
+						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
+						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
+						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
+				    }
+				    cleanonce=true;
+				}
+			}
+			else	{
+				cleanonce=false;
+			}
+					
+			try{					
+				Thread.sleep(1000*60*60);//休息1小时
+			}catch(Exception e){
+				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+			}
+		}
 	}
 	
 	
