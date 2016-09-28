@@ -144,6 +144,7 @@ public class RedisServer {
 	public TreeSet<String> scan(String pattern){
 		TreeSet<String> keys = new TreeSet<String>();
 		ScanResult<String> scankey=null;
+		List<String> tmplist=null;
 		String cursor=null;
 		ScanParams params=new ScanParams();
 
@@ -159,7 +160,13 @@ public class RedisServer {
             		if(scankey!=null)
             		{
             			cursor=scankey.getStringCursor();
-            			keys.addAll(scankey.getResult());
+            			tmplist=scankey.getResult();
+            			if(tmplist!=null&&tmplist.size()>0){
+            				if(tmplist.get(0).contains("empty list or set")==false)
+            				{
+            					for(int i=0;i<tmplist.size();i++)keys.add(tmplist.get(i));//将String元素逐个加入，默认重复不会加入
+            				}
+            			}
             		}
             	}while(cursor.equals("0")==false); 
                 logger.info(" Get keys from"+connection.getClient().getHost() +":"+connection.getClient().getPort());

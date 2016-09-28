@@ -178,12 +178,6 @@ public class G4jk_ref_Syn {
 	        		    	key_value=null;
 	        		    }
 	        		    tmplist=null;
-	        		    logger.info(fileinfo.getMd5value()+","+
-	        		    		fileinfo.getFtppassword()+","+
-	        		    		fileinfo.getFtppath()+","+
-	        		    		fileinfo.getFtpusername()+","+
-	        		    		fileinfo.getFilestatus()+","+
-	        		    		fileinfo.getZippassword()); //输出测试
 	    		    }
 	    		    //logger.info(body);  //输出测试
 	    	        bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容
@@ -532,3 +526,10 @@ public class G4jk_ref_Syn {
 			//g4jk_ref_Syn.ref_data_syn("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
 		}
 }
+
+//logger.info(fileinfo.getMd5value()+","+
+//fileinfo.getFtppassword()+","+
+//fileinfo.getFtppath()+","+
+//fileinfo.getFtpusername()+","+
+//fileinfo.getFilestatus()+","+
+//fileinfo.getZippassword()); //输出测试
