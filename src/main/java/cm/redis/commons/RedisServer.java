@@ -147,7 +147,7 @@ public class RedisServer {
 		List<String> tmplist=null;
 		String cursor=null;
 		ScanParams params=new ScanParams();
-
+		int i=0;
         for(String k : clusterNodes.keySet()){  
             JedisPool jp = clusterNodes.get(k);  
             Jedis connection = jp.getResource();  
@@ -164,7 +164,7 @@ public class RedisServer {
             			if(tmplist!=null&&tmplist.size()>0){
             				if(tmplist.get(0).contains("empty list or set")==false)
             				{
-            					for(int i=0;i<tmplist.size();i++)keys.add(tmplist.get(i));//将String元素逐个加入，默认重复不会加入
+            					for(i=0;i<tmplist.size();i++)keys.add(tmplist.get(i));//将String元素逐个加入，默认重复不会加入
             				}
             			}
             		}
@@ -388,6 +388,43 @@ public class RedisServer {
 		return res;
 	}
 	
+	/**
+	 * 游标方式获取key对应的所有集合成员，比smembers操作更加节省资源，便于使用
+	 * @param cursor 游标，初始为0，最后返回为0，则表示遍历完成
+	 * @param params 游标对应的匹配参数包括count和match
+	 * @return
+	 */
+	public TreeSet<String> sscan(String key, String pattern){
+		TreeSet<String> members = new TreeSet<String>();
+		ScanResult<String> scankey=null;
+		List<String> tmplist=null;
+		String cursor=null;
+		ScanParams params=new ScanParams();
+		int i=0;
+        try {
+        	cursor="0";
+        	if(pattern!=null)params.match(pattern);
+        	params.count(50);
+        	do{
+        		scankey=jedisCluster.sscan(key, cursor, params);
+        		if(scankey!=null)
+        		{
+        			cursor=scankey.getStringCursor();
+        			tmplist=scankey.getResult();
+        			if(tmplist!=null&&tmplist.size()>0){
+        				if(tmplist.get(0).contains("empty list or set")==false)
+        				{
+        					for(i=0;i<tmplist.size();i++)members.add(tmplist.get(i));//将String元素逐个加入，默认重复不会加入
+        				}
+        			}
+        		}
+        	}while(cursor.equals("0")==false); 
+        } catch(Exception e){  
+            logger.info(" Getting keys error: ", e); 
+            return null;
+        } 
+        return members;  
+	}
 	/*set集合操作封装结束*/
 	
 	/*hash散列操作封装*/
