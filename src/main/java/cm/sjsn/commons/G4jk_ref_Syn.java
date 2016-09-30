@@ -44,6 +44,47 @@ public class G4jk_ref_Syn {
 		}
 
 		/**
+		 * 更新4G网分维表信息-对外接口
+		 * @param sjsn_id 接口提供的id
+		 * @param private_folder 存放数据的对应文件夹名称，由用户自定义 最后不需要添加"/"
+		 */
+		public void ref_data_syn(String sjsn_id, String private_folder){
+			String url=null;
+			String json=null;
+			Ftpfilebasicinfo ftpinfo=null;
+			File[] dlfiles=null;
+			boolean check=false;
+
+			//解析本地文件
+			if(sjsn_id==null||sjsn_id.trim().equals("")==true){
+				check=getreffilesdircetly(private_folder);
+				if(check==true)
+				{
+					dlfiles=getExtractedFiles();
+					check=checkreffilerecords(dlfiles);
+					if(check==true)processunzipfile(dlfiles);
+				}
+			}else{
+				//解析接口数据
+				if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
+				url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+				json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
+				deletefiles(private_folder); 
+				ftpinfo=getfileinfo(url,json);
+				check=downloadfile(ftpinfo,private_folder);
+				if(check==true)
+				{
+					check=unzipfilewithpassword(ftpinfo, private_folder);
+					if(check==true){
+						dlfiles=getExtractedFiles();
+						check=checkreffilerecords(dlfiles);
+						if(check==true)processunzipfile(dlfiles); //
+					}
+				}
+			}
+		}
+		
+		/**
 		 * 删除对应数据接口存放数据文件目录下的所有文件，也就是先做数据清理，只删除文件，不删除文件夹
 		 * @param private_folder 基于ResourcesConfig.SYN_SERVER_DATAFILE之上的数据枢纽数据文件夹名称，最后不需要添加"/"
 		 */
@@ -458,43 +499,49 @@ public class G4jk_ref_Syn {
 			}
 		}
 		
+		
 		/**
-		 * 更新4G网分维表信息-对外接口
-		 * @param sjsn_id 接口提供的id
-		 * @param private_folder 存放数据的对应文件夹名称，由用户自定义 最后不需要添加"/"
+		 * 按照接口格式获取接口返回的数据信息，结果为json格式，变量带双引号
+		 * @param add_url   数据枢纽http url路径
+		 * @param json_params 获取文件信息所需的参数构成的json格式
+		 * @return String 
 		 */
-		public void ref_data_syn(String sjsn_id, String private_folder){
-			String url=null;
-			String json=null;
-			Ftpfilebasicinfo ftpinfo=null;
-			File[] dlfiles=null;
-			boolean check=false;
+		public String getSjsnInterfaceInfo(String add_url, String json_params)
+		{
+			String body = null; //存放返回的数据信息
+	        try{
+	    		HttpClient client = new HttpClient();
+	    		PostMethod post = new PostMethod(add_url);
+	            StringRequestEntity entity = null;
+	        	entity = new StringRequestEntity(json_params,null,"utf-8");
+	            post.setRequestHeader("Content-Type","application/json");
+	            post.setRequestEntity(entity);
+	        	HostConfiguration hostConfiguration = new  HostConfiguration();
+	        	String data = null;
 
-			if(sjsn_id==null||sjsn_id.trim().equals("")==true){
-				check=getreffilesdircetly(private_folder);
-				if(check==true)
-				{
-					dlfiles=getExtractedFiles();
-					check=checkreffilerecords(dlfiles);
-					if(check==true)processunzipfile(dlfiles);
-				}
-			}else{
-				if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
-				url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
-				json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
-				deletefiles(private_folder); 
-				ftpinfo=getfileinfo(url,json);
-				check=downloadfile(ftpinfo,private_folder);
-				if(check==true)
-				{
-					check=unzipfilewithpassword(ftpinfo, private_folder);
-					if(check==true){
-						dlfiles=getExtractedFiles();
-						check=checkreffilerecords(dlfiles);
-						if(check==true)processunzipfile(dlfiles); //
-					}
-				}
-			}
+	            StringBuffer bodyBuffer = new StringBuffer("");
+	            int statusCode =0;
+	            
+	            statusCode=client.executeMethod(hostConfiguration, post);
+	            if(statusCode==HttpStatus.SC_OK)
+	            {
+	                BufferedReader br = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream(),"UTF-8"));
+	    		    while((data = br.readLine())!=null)
+	    		    {
+	    		    	bodyBuffer.append(data);
+	    		    }
+	    		    br.close(); 
+	    		    body = bodyBuffer.toString();
+	           }
+	           else body=null;
+	           if(bodyBuffer.length()>=1)bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容    
+	        }
+	        catch(Exception ex)
+	        {
+	        	logger.info("GetSjsnInterfaceInfo error: "+ex.getMessage());
+	        	return null;
+	        }
+	 	   	return body;	
 		}
 		
 		/**

@@ -6,6 +6,10 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import cm.redis.commons.RedisServer;
 import cm.redis.commons.TimeFormatter;
 import cm.sjsn.commons.G4jk_ref_Syn;
@@ -20,6 +24,54 @@ public class Flush_Redis_DB {
 	 * 对redis中关于storm存放在redis上的数据进行统一的清理工作
 	 */
 	public static Logger logger=Logger.getLogger(Flush_Redis_DB.class);
+	
+	/**
+	 * 主函数
+	 * @param args
+	 */
+	public static void main(String[] args)
+	{
+		//测试代码段
+//		Flush_Redis_DB.flush_g4jk();
+//		Flush_Redis_DB.flush_g4jk_ref();
+		
+		//正式代码段
+		boolean cleanonce=false;
+		while(true)
+		{
+			//每天固定凌晨3点清理一次数据
+			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
+			{
+				if(cleanonce==false){
+					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
+					Flush_Redis_DB.flush_biglogs();
+					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+					Flush_Redis_DB.flush_g4jk();
+				    if(TimeFormatter.getHour().equals("03")==true){
+						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
+						Flush_Redis_DB.flush_g4jk_ref();
+						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
+						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
+						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
+						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
+				    }
+				    cleanonce=true;
+				}
+			}
+			else	{
+				cleanonce=false;
+				//每隔半个小时读取最新的接口触点关键字配置信息，用于提供给storm实时分析的指标
+				Flush_Redis_DB.setSjjsParamsToRedis();
+			}
+					
+			try{					
+				Thread.sleep(1000*60*30);//休息1小时
+			}catch(Exception e){
+				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+			}
+		}
+	}
 	
 	/**
 	 * 对大日志过期数据进行清理
@@ -211,54 +263,50 @@ public class Flush_Redis_DB {
 	{
 			G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
 			g4jk_ref_Syn.ref_data_syn(sjsn_id, private_folder);
+			g4jk_ref_Syn=null;
 	}
 	
 	/**
-	 * 主函数
-	 * @param args
+	 * 获取接口配置好的触点相关的关键信息，录入到redis，提供给实时系统用于计算
 	 */
-	public static void main(String[] args)
-	{
-		//测试代码段
-//		Flush_Redis_DB.flush_g4jk();
-//		Flush_Redis_DB.flush_g4jk_ref();
-		
-		//正式代码段
-		boolean cleanonce=false;
-		while(true)
-		{
-			//每天固定凌晨3点清理一次数据
-			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
+	public static void setSjjsParamsToRedis(){
+		String url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+		String json="{\"identify\": \"d15040f9-d5f2-4b56-bfae-e22df035ef65\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\", \"parameter\":{}}";
+		String returnjson=null;
+		G4jk_ref_Syn g4jk_ref_Syn=new G4jk_ref_Syn();
+		returnjson=g4jk_ref_Syn.getSjsnInterfaceInfo(url,json);
+		String record=null;
+		int split=0;
+		String key=null;
+		String value=null;
+		//获取实例
+		RedisServer redisserver=RedisServer.getInstance();
+		if(returnjson!=null&&returnjson.equals("")==false){
+			JSONObject jsonObject = JSON.parseObject(returnjson);
+			JSONArray jsonArray= jsonObject.getJSONArray("records");
+			if(jsonArray!=null&&jsonArray.size()>0)
 			{
-				if(cleanonce==false){
-					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
-					Flush_Redis_DB.flush_biglogs();
-					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
-					Flush_Redis_DB.flush_g4jk();
-				    if(TimeFormatter.getHour().equals("03")==true){
-						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
-						Flush_Redis_DB.flush_g4jk_ref();
-						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
-						Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
-						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
-						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
-						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
-				    }
-				    cleanonce=true;
+				for(int i=0;i<jsonArray.size();i++)
+				{
+					record=jsonArray.getString(i);
+					if(record.length()>0){
+						split=record.indexOf(",");
+						//SJJS093,上网行为类型:购物论坛;上网搜索热词:家宽,宽带,极光,电信;
+						key=record.substring(0, split).trim().toUpperCase();
+						value=record.substring(split+1);
+						if(key.contains("SJJS")==true&&value.length()>0){
+							key="ref_sjjsparams_"+key;
+							redisserver.set(key, value);
+						}
+					}
 				}
 			}
-			else	{
-				cleanonce=false;
-			}
-					
-			try{					
-				Thread.sleep(1000*60*60);//休息1小时
-			}catch(Exception e){
-				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
-			}
+		}else{
+			logger.info("setSjjsParamsToRedis opt error: sjsn doesn't return any params");
 		}
+		
+		g4jk_ref_Syn=null;
 	}
-	
 	
 }
 
