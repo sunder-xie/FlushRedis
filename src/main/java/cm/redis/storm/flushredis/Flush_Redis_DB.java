@@ -292,7 +292,7 @@ public class Flush_Redis_DB {
 					record=jsonArray.getString(i);
 					if(record.length()>0){
 						split=record.indexOf(",");
-						//SJJS093,上网行为类型:购物论坛;上网搜索热词:家宽,宽带,极光,电信;
+						//SJJS093,上网行为类型:购物#论坛;上网搜索热词:家宽#宽带#极光#电信;
 						key=record.substring(0, split).trim().toUpperCase();
 						value=record.substring(split+1);
 						if(key.contains("SJJS")==true&&value.length()>0){
