@@ -54,7 +54,7 @@ public class Flush_Redis_DB {
 						// Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f"
 						// Flush_Redis_DB.update_g4jk_ref(null, "webtag"); 
 						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，要求ref文件，
-						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");	//"c1ed7776-a16b-4472-a1bd-954df3925466"
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //需要获取对应的号码与imsi转换表，0b67bada-c954-418d-aa25-347b5810c679
 				    }
 				    cleanonce=true;
@@ -311,6 +311,9 @@ public class Flush_Redis_DB {
 	
 }
 
+//高流量低余额接口信息
+//String add_url = "http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+//String json_params = "{\"identify\": \"26c068d5-5cf5-4951-9df4-0e597c4f0bbb\", \"userName\":\"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\""+MyTime.getYestoday()+"\",\"flux\":\"100\",\"amt\":\"20\"}}";
 
 //try{					
 //logger.info(" Storm-redis-cleaner is sleeping...zzz...");
