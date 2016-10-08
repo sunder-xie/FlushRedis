@@ -314,7 +314,7 @@ public class Flush_Redis_DB {
 //高流量低余额接口信息
 //String add_url = "http://10.245.254.110:8080/etl_platform/rest/service.shtml";
 //String json_params = "{\"identify\": \"26c068d5-5cf5-4951-9df4-0e597c4f0bbb\", \"userName\":\"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\""+MyTime.getYestoday()+"\",\"flux\":\"100\",\"amt\":\"20\"}}";
-
+//号码 IMSI IMEI 用户余额（元） DOU（MB） 4GDOU（MB） 流量剩余资源（MB） 4G剩余流量资源（MB）
 //try{					
 //logger.info(" Storm-redis-cleaner is sleeping...zzz...");
 //Thread.sleep(1000*60*60);
