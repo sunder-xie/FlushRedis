@@ -584,3 +584,8 @@ public class G4jk_ref_Syn {
 //fileinfo.getFtpusername()+","+
 //fileinfo.getFilestatus()+","+
 //fileinfo.getZippassword()); //输出测试
+
+//高流量低余额接口信息
+//String add_url = "http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+//String json_params = "{\"identify\": \"26c068d5-5cf5-4951-9df4-0e597c4f0bbb\", \"userName\":\"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\""+MyTime.getYestoday()+"\",\"flux\":\"100\",\"amt\":\"20\"}}";
+
