@@ -452,42 +452,50 @@ public class G4jk_ref_Syn {
 					reader = new BufferedReader(new FileReader(files[i]));
 					String tempString = reader.readLine();//先读取第一行的数据
 					choose=0;
-					if(StringUtils.contains(tempString, "imsi"))choose=1; //读取imsi对应标签的维表
-					else if(StringUtils.contains(tempString, "hotsid"))choose=2;//读取tac ci对应区域的标签维表
-					else if(StringUtils.contains(tempString, "tac_ci"))choose=3; //读取tac ci对应相同经纬度tac ci的翻译维表
-					//else if(StringUtils.contains(tempString, "subid"))choose=4; //读取已经去重的subid与webtag 大类别的翻译维表
+					if(StringUtils.contains(tempString, "imsi"))choose=1; 			//读取imsi对应标签的维表
+					else if(StringUtils.contains(tempString, "hotsid"))choose=2;	//读取tac ci对应区域的标签维表
+					else if(StringUtils.contains(tempString, "tac_ci"))choose=3; 	//读取tac ci对应相同经纬度tac ci的翻译维表
+					else if(StringUtils.contains(tempString, "subid"))choose=4; 	//读取已经去重的业务大类与小类的翻译维表
 					while ((tempString = reader.readLine()) != null) {
 						// 以下则是逐行将数据做转换，录入redis数据库
 						recinfo=tempString.split(";"); //按照分号划分获取字段
 						switch(choose){
-							case 1: //phonenum imsi对应维表
-								recinfo[0]=recinfo[0].trim();
-								recinfo[1]=recinfo[1].trim();
-								if(recinfo[1].length()>=15&&recinfo[0].length()>=11){
-									key="ref_imsiphn_"+recinfo[1];
-									value=recinfo[0];
-									redisserver.set(key, value);
+							case 1: //usr_nbr;imsi对应维表
+								if(recinfo.length>=2){
+									recinfo[0]=recinfo[0].trim();
+									recinfo[1]=recinfo[1].trim();
+									if(recinfo[1].length()>=15&&recinfo[0].length()>=11){
+										key="ref_imsiphn_"+recinfo[1];
+										value=recinfo[0];
+										redisserver.set(key, value);
+									}
 								}
 								break;
 							case 2: //hotsid tac ci对应维表，接口读取过来的数据 3 hotspot id, 4 tac, 5 ci
-								key=recinfo[5].trim();
-								if(key.equals("0")==true)recinfo[5]="none";
-								key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
-								value=recinfo[3].trim();
-								redisserver.sadd(key, value);
-								key="ref_hsp_set"; //整理出所有项目，当天最新的全部热点区域
-								redisserver.sadd(key, value);
+								if(recinfo.length>=6){
+									key=recinfo[5].trim();
+									if(key.equals("0")==true)recinfo[5]="none";
+									key="ref_hsp_"+recinfo[4].trim()+"_"+recinfo[5].trim();
+									value=recinfo[3].trim();
+									redisserver.sadd(key, value);
+									key="ref_hsp_set"; //整理出所有项目，当天最新的全部热点区域
+									redisserver.sadd(key, value);
+								}
 								break;
 							case 3: //tac_ci posid对应维表
-								key="ref_hpm_"+recinfo[0].trim();
-								value=recinfo[1].trim();
-								redisserver.set(key, value);
+								if(recinfo.length>=2){
+									key="ref_hpm_"+recinfo[0].trim();
+									value=recinfo[1].trim();
+									redisserver.set(key, value);
+								}
 								break;
-//							case 4: //subid webtag 大类英文维表
-//								key="ref_wtag_"+recinfo[0].trim();
-//								value=recinfo[1].trim();
-//								redisserver.set(key, value);
-//								break;
+							case 4: //subid webtag 业务类别维表
+								if(recinfo.length>=2){
+									key="ref_wtag_"+recinfo[0].trim();
+									value=recinfo[1].trim();
+									redisserver.set(key, value);
+								}
+								break;
 							default:
 								logger.info(" [processunzipfile method] no import method for current ref file to Redis.");
 								break;
