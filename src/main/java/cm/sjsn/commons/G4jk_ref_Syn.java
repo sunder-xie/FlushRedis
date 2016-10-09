@@ -569,7 +569,7 @@ public class G4jk_ref_Syn {
 //			List<File> FileList = new ArrayList<File>();
 //			refdata=new File("E:/WorkSpace/tb_mofang_custtag_ref.txt");
 //			FileList.add(refdata);
-//			refdata=new File("E:/WorkSpace/data.txt");//tb_mofang_hotspot_ref.txt
+//			refdata=new File("E:/WorkSpace/data.txt");//tb_mofang_hotspot_ref.txt;tb_mofang_imsiphn_ref.txt
 //			FileList.add(refdata);
 //			refdata=new File("E:/WorkSpace/tb_mofang_tcsll_ref.txt");
 //			FileList.add(refdata);
