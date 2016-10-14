@@ -43,19 +43,19 @@ public class Flush_Redis_DB {
 			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
 			{
 				if(cleanonce==false){
-					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息
-					Flush_Redis_DB.flush_biglogs();
+					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息，暂停
+					//Flush_Redis_DB.flush_biglogs();
 					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
 					Flush_Redis_DB.flush_g4jk();
 				    if(TimeFormatter.getHour().equals("03")==true){ //每天更新一次维表信息
 						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
-						Flush_Redis_DB.flush_g4jk_ref();
+						Flush_Redis_DB.flush_g4jk_ref();//仅清理掉昨天过期的imsi phonenumber数据
 						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
 						// Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f" 
-						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，ref文件:tb_mofang_tcsll_ref.txt
-						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); //直接对已有的ref文件进行更新，ref文件:tb_mofang_webtag_ref.txt
-						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");		//tac ci与热点区域转换维表，c1ed7776-a16b-4472-a1bd-954df3925466
-						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，0b67bada-c954-418d-aa25-347b5810c679
+						//Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_tcsll_ref.txt
+						//Flush_Redis_DB.update_g4jk_ref(null, "webtag"); //直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_webtag_ref.txt
+						//Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");	//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
+						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 				    }
 				    cleanonce=true;
 				}
@@ -71,96 +71,6 @@ public class Flush_Redis_DB {
 			}catch(Exception e){
 				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 			}
-		}
-	}
-	
-	/**
-	 * 对大日志过期数据进行清理
-	 */
-	public static void flush_biglogs()
-	{
-		RedisServer redisserver=null;
-		TreeSet<String> keys=null; 
-		Iterator<String> keylist =null;
-		String date=null;
-		String key=null;
-		String dt=null;
-		int test_ip_num=0;
-		
-		//获取实例
-		redisserver=RedisServer.getInstance();
-
-		test_ip_num=0;
-		logger.info(" Start to get biglogs storm-redis-keys");
-		
-		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
-		
-		//仅删除大日志相关的数据
-		try {
-			logger.info(" Start to clear biglogs storm-redis-keys which are out of date!!!");
-			keys=redisserver.scan("src*"); 		//获取所有的src keys
-			if(keys!=null&&keys.size()>0){
-				keylist = keys.iterator();
-				while(keylist.hasNext())
-				{
-					key=keylist.next().toString();
-					if(StringUtils.contains(key, "src_date")==false){
-						if(StringUtils.contains(key, date)==false){
-							redisserver.del(key);
-							test_ip_num+=1;
-						}
-					}
-					else{
-						dt=redisserver.get(key);
-						if(dt!=null)
-						{
-							if(StringUtils.equals(dt, date)==false){
-								redisserver.del(key);
-								test_ip_num+=1;
-							}
-						}
-					}
-				}				
-			}
-			
-			keys=redisserver.scan("dst*"); 		//获取所有的dst keys
-			if(keys!=null&&keys.size()>0){
-				keylist = keys.iterator();
-				while(keylist.hasNext())
-				{
-					key=keylist.next().toString();
-					if(StringUtils.contains(key, "dst_date")==false ){
-						if(StringUtils.contains(key, date)==false){
-							redisserver.del(key);
-							test_ip_num+=1;
-						}
-					}
-					else{
-						dt=redisserver.get(key);
-						if(dt!=null)
-						{
-							if(StringUtils.equals(dt, date)==false){
-								redisserver.del(key);
-								test_ip_num+=1;
-							}
-						}
-					}
-				}				
-			}
-			
-			test_ip_num=test_ip_num/5;
-			
-			//释放内存
-			redisserver=null;
-			date=null;
-			keys=null;
-			keylist=null;
-			key=null;
-			dt=null;
-			
-			logger.info(" Complete clear biglogs redis-keys, removes "+test_ip_num+" ip (out of date)");					
-		} catch (Exception e) {
-			logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 		}
 	}
 	
@@ -232,7 +142,7 @@ public class Flush_Redis_DB {
 
 		try {
 			logger.info(" Start to clear g4jk_ref storm-redis-keys which are out of date!!!");
-			keys=redisserver.scan("ref*"); 		//获取所有的ref 相关的keys
+			keys=redisserver.scan("ref_imsiphn_*"); 		//获取每天需要更新的ref 相关的keys，imsi与号码翻译是必须要每天更新一次的
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -321,4 +231,94 @@ public class Flush_Redis_DB {
 //}catch(Exception e)
 //{
 //logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+//}
+
+/**
+ * 对大日志过期数据进行清理
+ */
+//public static void flush_biglogs()
+//{
+//	RedisServer redisserver=null;
+//	TreeSet<String> keys=null; 
+//	Iterator<String> keylist =null;
+//	String date=null;
+//	String key=null;
+//	String dt=null;
+//	int test_ip_num=0;
+//	
+//	//获取实例
+//	redisserver=RedisServer.getInstance();
+//
+//	test_ip_num=0;
+//	logger.info(" Start to get biglogs storm-redis-keys");
+//	
+//	date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
+//	
+//	//仅删除大日志相关的数据
+//	try {
+//		logger.info(" Start to clear biglogs storm-redis-keys which are out of date!!!");
+//		keys=redisserver.scan("src*"); 		//获取所有的src keys
+//		if(keys!=null&&keys.size()>0){
+//			keylist = keys.iterator();
+//			while(keylist.hasNext())
+//			{
+//				key=keylist.next().toString();
+//				if(StringUtils.contains(key, "src_date")==false){
+//					if(StringUtils.contains(key, date)==false){
+//						redisserver.del(key);
+//						test_ip_num+=1;
+//					}
+//				}
+//				else{
+//					dt=redisserver.get(key);
+//					if(dt!=null)
+//					{
+//						if(StringUtils.equals(dt, date)==false){
+//							redisserver.del(key);
+//							test_ip_num+=1;
+//						}
+//					}
+//				}
+//			}				
+//		}
+//		
+//		keys=redisserver.scan("dst*"); 		//获取所有的dst keys
+//		if(keys!=null&&keys.size()>0){
+//			keylist = keys.iterator();
+//			while(keylist.hasNext())
+//			{
+//				key=keylist.next().toString();
+//				if(StringUtils.contains(key, "dst_date")==false ){
+//					if(StringUtils.contains(key, date)==false){
+//						redisserver.del(key);
+//						test_ip_num+=1;
+//					}
+//				}
+//				else{
+//					dt=redisserver.get(key);
+//					if(dt!=null)
+//					{
+//						if(StringUtils.equals(dt, date)==false){
+//							redisserver.del(key);
+//							test_ip_num+=1;
+//						}
+//					}
+//				}
+//			}				
+//		}
+//		
+//		test_ip_num=test_ip_num/5;
+//		
+//		//释放内存
+//		redisserver=null;
+//		date=null;
+//		keys=null;
+//		keylist=null;
+//		key=null;
+//		dt=null;
+//		
+//		logger.info(" Complete clear biglogs redis-keys, removes "+test_ip_num+" ip (out of date)");					
+//	} catch (Exception e) {
+//		logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
+//	}
 //}
