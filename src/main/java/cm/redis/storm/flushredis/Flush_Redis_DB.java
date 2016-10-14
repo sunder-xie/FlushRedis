@@ -124,7 +124,7 @@ public class Flush_Redis_DB {
 	}
 	
 	/**
-	 * 对4G网分数据维表进行删除
+	 * 对4G网分数据维表进行删除，2016-10-14，仅对接口，imsi与号码转换信息进行更新
 	 */
 	public static void flush_g4jk_ref()
 	{
@@ -142,7 +142,20 @@ public class Flush_Redis_DB {
 
 		try {
 			logger.info(" Start to clear g4jk_ref storm-redis-keys which are out of date!!!");
+			//2016-10-14添加，如果需要自动化，再进行更新
 			keys=redisserver.scan("ref_imsiphn_*"); 		//获取每天需要更新的ref 相关的keys，imsi与号码翻译是必须要每天更新一次的
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					redisserver.del(key);
+					num+=1;
+				}
+			}
+			
+			//2016-10-14添加，如果需要自动化，再进行更新
+			keys=redisserver.scan("ref_sjjsparams_*"); 		//获取每天需要更新的ref 相关的keys，接口获取的sjjs信息也需要每天删除一次更新，这么做可以清理掉旧的已经不使用的数据
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
