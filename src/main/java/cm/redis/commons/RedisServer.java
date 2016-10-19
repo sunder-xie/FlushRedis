@@ -66,7 +66,7 @@ public class RedisServer {
 	 * 获取缓存管理器唯一实例
 	 * @return
 	 */
-	public static final RedisServer getInstance() {
+	public static RedisServer getInstance() {
 		if(INSTANCE==null){
 			synchronized (RedisServer.class) {
 				if(INSTANCE==null){
