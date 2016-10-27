@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,14 +135,15 @@ public class G4jk_ref_Syn {
 		public Ftpfilebasicinfo getfileinfo(String add_url, String json_params)
 		{
 			logger.info("[getfileinfo method] starts");
-			HttpClient client = new HttpClient();
-	        
-			PostMethod post = new PostMethod(add_url);
+			HttpClient client = null; 
 	        StringRequestEntity entity = null;
-	        
+	        PostMethod post = null;
+	        HostConfiguration hostConfiguration = null;
 	        //文件下载相关信息对象
 	        Ftpfilebasicinfo fileinfo=new Ftpfilebasicinfo();
-	        
+	        BufferedReader br = null;
+	        String data = null;
+            StringBuffer bodyBuffer = null; 
 	        try
 	        {
 	        	entity = new StringRequestEntity(json_params,null,"utf-8");
@@ -150,22 +152,22 @@ public class G4jk_ref_Syn {
 	        	logger.info("[getfileinfo method] runing error: "+ex.getMessage());
 	        }
 	        
-	        post.setRequestHeader("Content-Type","application/json");
-	        post.setRequestEntity(entity);
-	        
 	        try{
-	        	HostConfiguration hostConfiguration = new  HostConfiguration();
-	        	String data = null;
-	            StringBuffer bodyBuffer = new StringBuffer("");
 	            int statusCode =0;
-	            
 	            while(StringUtils.contains(fileinfo.getFilestatus(), "running")==true)
 	            {
 	            	logger.info(" Data Service is running! ");
+		            client =new HttpClient();
+	            	bodyBuffer =new StringBuffer("");
+	            	hostConfiguration= new  HostConfiguration();
+	            	post = new PostMethod(add_url);
+	           	 	post.setRequestHeader("Connection", "close");
+	       	        post.setRequestHeader("Content-Type","application/json");
+	       	        post.setRequestEntity(entity);
 	            	statusCode=client.executeMethod(hostConfiguration, post);
 	                if(statusCode==HttpStatus.SC_OK)
 	                {
-	                	BufferedReader br = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream(),"UTF-8"));
+	                	br=new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream(),"UTF-8"));
 	    		    	while((data = br.readLine())!=null)
 	    		    	{
 	    		    		bodyBuffer.append(data);
@@ -221,11 +223,24 @@ public class G4jk_ref_Syn {
 	        		    tmplist=null;
 	    		    }
 	    		    //logger.info(body);  //输出测试
-	    	        bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容
+	    	        if(bodyBuffer.length()>=1)bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容
+		            //释放连接
+		            if(post!=null){
+		 			   post.releaseConnection();
+		 			}
+		            if(client!=null){
+		            	client.getHttpConnectionManager().closeIdleConnections(0);
+		            }
+		            //释放内存
+		            br=null;
+		            post=null;
+		            client=null;
+		            bodyBuffer =null;
+		            hostConfiguration=null;
 	    	        if(StringUtils.contains(fileinfo.getFilestatus(), "running")==true)
 	    	        {
 	    	        	Thread.currentThread();
-	    	        	Thread.sleep(10000); //休眠10秒之后重新进行http请求
+	    	        	Thread.sleep(20000); //休眠20秒之后重新进行http请求
 	    	        }
 	            }
 	            logger.info(" [getfileinfo method] ends successfully");
@@ -233,6 +248,25 @@ public class G4jk_ref_Syn {
 	        catch(Exception ex)
 	        {
 	        	logger.info(" [getfileinfo method] runing error: "+ex.getMessage());
+	        	if(br!=null){
+	        		try{
+	        			br.close();
+	        		}catch(IOException e){
+	        			logger.info(" GetSjsnInterfaceInfo close bufferreader error: "+ex.getMessage());
+	        		}
+	        	}
+	        	if(post!=null){
+	 			   post.releaseConnection();
+	 			}
+	            if(client!=null){
+	            	client.getHttpConnectionManager().closeIdleConnections(0);
+	            }
+	            //释放内存
+	            post=null;
+	            client=null;
+  	            br=null;
+  	            bodyBuffer =null;
+	            hostConfiguration=null;
 	        }
 	        return fileinfo;
 		}
