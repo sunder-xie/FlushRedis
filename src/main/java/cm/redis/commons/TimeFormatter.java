@@ -122,6 +122,36 @@ public class TimeFormatter {
 	}
 	
 	/**
+	 * 获取前天，格式  yyyyMMdd
+	 * @return 前天
+	 */
+	public static String getTheDayBeforYestoday()
+	{
+		String dt="190001";			
+		
+		Calendar c = Calendar.getInstance(); 
+        c.add(Calendar.DATE, -2); 
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd"); //设置日期格式		
+		dt=df.format(c.getTime());           // new Date()为获取当前系统时间		
+		return dt;
+	}
+	
+	/**
+	 * 获取前天，格式  yyyy-MM-dd
+	 * @return 前天
+	 */
+	public static String getTheDayBeforYestoday2()
+	{
+		String dt="190001";			
+		
+		Calendar c = Calendar.getInstance(); 
+        c.add(Calendar.DATE, -2); 
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd"); //设置日期格式		
+		dt=df.format(c.getTime());           // new Date()为获取当前系统时间		
+		return dt;
+	}
+	
+	/**
 	 * 获取当前小时，格式  HH
 	 * @return 当前小时
 	 */

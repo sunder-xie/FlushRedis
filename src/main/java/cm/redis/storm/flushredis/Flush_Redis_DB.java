@@ -82,7 +82,8 @@ public class Flush_Redis_DB {
 		RedisServer redisserver=null;
 		TreeSet<String> keys=null; 
 		Iterator<String> keylist =null;
-		String date=null;
+		String date1=null;
+		String date2=null;
 		String key=null;
 		int num=0;
 		
@@ -92,27 +93,33 @@ public class Flush_Redis_DB {
 		num=0;
 		logger.info(" Start to get g4jk storm-redis-keys");
 		
-		date=TimeFormatter.getDate2(); //获取当前日期，需要确定本程序运行的系统环境时间是正确的时间
-
+		date1=TimeFormatter.getTheDayBeforYestoday2(); //获取前天的日期，删除前天热点的信息
+		date2=TimeFormatter.getDate2();    //获取当前日期
 		//仅删除大数据魔方相关的过期数据
 		try {
 			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
-			keys=redisserver.scan("mfg4*");  	//获取与大数据魔方实时展示相关的keys
+			keys=redisserver.scan("mfg4*");  	//获取前天的全部信息
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
 				{
 					key=keylist.next().toString();
-					if(StringUtils.contains(key, date)==false){
+					if(StringUtils.contains(key, date1)==true){
 						redisserver.del(key);
 						num+=1;
+					}else if(StringUtils.contains(key, date2)==true){ //保留昨天的热力图和热点区域
+						if(StringUtils.contains(key, "hmset")==false&&StringUtils.contains(key, "hspset")==false){
+							redisserver.del(key);
+							num+=1;
+						}
 					}
 				}
 			}
 			
 			//释放内存
 			redisserver=null;
-			date=null;
+			date1=null;
+			date2=null;
 			keys=null;
 			keylist=null;
 			key=null;
