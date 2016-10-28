@@ -555,23 +555,30 @@ public class G4jk_ref_Syn {
 		public String getSjsnInterfaceInfo(String add_url, String json_params)
 		{
 			String body = null; //存放返回的数据信息
+			String data = null;
+			PostMethod post = null;
+	    	BufferedReader br = null;
+	    	HttpClient client = null;
+	    	StringRequestEntity entity = null;
+	    	HostConfiguration hostConfiguration =null;
+	    	StringBuffer bodyBuffer =null;
+	    	int statusCode =0;
 	        try{
-	    		HttpClient client = new HttpClient();
-	    		PostMethod post = new PostMethod(add_url);
-	            StringRequestEntity entity = null;
-	        	entity = new StringRequestEntity(json_params,null,"utf-8");
+	    		client = new HttpClient();
+	    		entity = new StringRequestEntity(json_params,null,"utf-8");
+	    		
+	    		post = new PostMethod(add_url);
+	    		post.setRequestHeader("Connection", "close");
 	            post.setRequestHeader("Content-Type","application/json");
 	            post.setRequestEntity(entity);
-	        	HostConfiguration hostConfiguration = new  HostConfiguration();
-	        	String data = null;
-
-	            StringBuffer bodyBuffer = new StringBuffer("");
-	            int statusCode =0;
+	        	hostConfiguration = new  HostConfiguration();
+	        	bodyBuffer = new StringBuffer("");
+	            statusCode =0;
 	            
 	            statusCode=client.executeMethod(hostConfiguration, post);
 	            if(statusCode==HttpStatus.SC_OK)
 	            {
-	                BufferedReader br = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream(),"UTF-8"));
+	                br = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream(),"UTF-8"));
 	    		    while((data = br.readLine())!=null)
 	    		    {
 	    		    	bodyBuffer.append(data);
@@ -580,11 +587,35 @@ public class G4jk_ref_Syn {
 	    		    body = bodyBuffer.toString();
 	           }
 	           else body=null;
-	           if(bodyBuffer.length()>=1)bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容    
+	           if(bodyBuffer.length()>=1)bodyBuffer.delete(0, bodyBuffer.length()-1); //释放内存与清空缓冲区内容
+	           if(post!=null){
+				   post.releaseConnection();
+				}
+				if(client!=null){
+					client.getHttpConnectionManager().closeIdleConnections(0);
+				}
+				post=null;
+				client=null;
 	        }
 	        catch(Exception ex)
 	        {
 	        	logger.info("GetSjsnInterfaceInfo error: "+ex.getMessage());
+	        	if(br!=null){
+	        		try{
+	        			br.close();
+	        		}catch(IOException e){
+	        			logger.info(" GetSjsnInterfaceInfo close bufferreader error: "+ex.getMessage());
+	        		}
+	        	}
+				if(post!=null){
+				   post.releaseConnection();
+				}
+				if(client!=null){
+					client.getHttpConnectionManager().closeIdleConnections(0);
+				}
+				post=null;
+				client=null;
+	            br=null;
 	        	return null;
 	        }
 	 	   	return body;	
