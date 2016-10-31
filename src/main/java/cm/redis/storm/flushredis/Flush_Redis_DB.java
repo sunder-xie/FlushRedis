@@ -54,7 +54,7 @@ public class Flush_Redis_DB {
 						// Flush_Redis_DB.update_g4jk_ref(null,"custtag");	//"d243c012-5ef5-4537-ad75-21c4b90fe74f" 
 						//Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_tcsll_ref.txt
 						//Flush_Redis_DB.update_g4jk_ref(null, "webtag"); //直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_webtag_ref.txt
-						//Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");	//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
+						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");	//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 				    }
 				    cleanonce=true;
