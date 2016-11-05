@@ -107,8 +107,10 @@ public class Flush_Redis_DB {
 					if(StringUtils.contains(key, date1)==true){
 						redisserver.del(key);
 						num+=1;
-					}else if(StringUtils.contains(key, date2)==true){ //保留昨天的热力图和热点区域
-						if(StringUtils.contains(key, "hmset")==false&&StringUtils.contains(key, "hspset")==false){
+					}else if(StringUtils.contains(key, date2)==true){ //保留昨天的热力图和热点区域，电商热搜词
+						if(StringUtils.contains(key, "hmset")==false
+						&&StringUtils.contains(key, "hspset")==false
+						&&StringUtils.contains(key, "ebusiw")==false){
 							redisserver.del(key);
 							num+=1;
 						}
