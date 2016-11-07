@@ -485,15 +485,27 @@ public class G4jk_ref_Syn {
 				{
 					reader = new BufferedReader(new FileReader(files[i]));
 					String tempString = reader.readLine();//先读取第一行的数据
-					choose=0;
-					if(StringUtils.contains(tempString, "imsi"))choose=1; 			//读取imsi对应标签的维表
+					choose=-1;
+					if(StringUtils.contains(tempString, "imid"))choose=0;				//读取imsi对应的人群标签的维表
+					else if(StringUtils.contains(tempString, "imsi"))choose=1; 		//读取imsi对应号码的维表
 					else if(StringUtils.contains(tempString, "hotsid"))choose=2;	//读取tac ci对应区域的标签维表
 					else if(StringUtils.contains(tempString, "tac_ci"))choose=3; 	//读取tac ci对应相同经纬度tac ci的翻译维表
 					else if(StringUtils.contains(tempString, "subid"))choose=4; 	//读取已经去重的业务大类与小类的翻译维表
 					while ((tempString = reader.readLine()) != null) {
 						// 以下则是逐行将数据做转换，录入redis数据库
-						recinfo=tempString.split(";"); //按照分号划分获取字段
+						recinfo=tempString.split(";"); //按照分号划分获取字段,一个用户可能有多个id
 						switch(choose){
+							case 0://imid;id对应维表
+								if(recinfo.length>=2){
+									recinfo[0]=recinfo[0].trim();
+									recinfo[1]=recinfo[1].trim();
+									if(recinfo[0].length()>=15){
+										key="ref_custtag_"+recinfo[0];
+										value=recinfo[1];
+										redisserver.sadd(key, value);
+									}
+								}
+								break;
 							case 1: //usr_nbr;imsi对应维表
 								if(recinfo.length>=2){
 									recinfo[0]=recinfo[0].trim();
