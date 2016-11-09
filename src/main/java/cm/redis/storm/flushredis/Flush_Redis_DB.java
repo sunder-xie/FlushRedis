@@ -75,7 +75,7 @@ public class Flush_Redis_DB {
 	}
 	
 	/**
-	 * 对4G网分数据进行删除
+	 * 对4G网分数据进行定期删除
 	 */
 	public static void flush_g4jk()
 	{
