@@ -91,7 +91,6 @@ public class Flush_Redis_DB {
 		Date curdate=new Date();
 		int days=0;
 		int num=0;
-		
 		//获取实例
 		redisserver=RedisServer.getInstance();
 
@@ -102,7 +101,7 @@ public class Flush_Redis_DB {
 		date2=TimeFormatter.getDate2();    //获取当前日期
 		
 		cal.setTime(curdate);
-		days=cal.get(Calendar.DAY_OF_MONTH);
+		days=cal.get(Calendar.DAY_OF_WEEK);
 		
 		//仅删除大数据魔方相关的过期数据
 		try {
@@ -125,7 +124,7 @@ public class Flush_Redis_DB {
 						}
 					}
 					
-					//每个月1日，清理热搜词
+					//每周第一天是周日，清理热搜词
 					if(days==1&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
 						redisserver.del(key);
 						num+=1;
