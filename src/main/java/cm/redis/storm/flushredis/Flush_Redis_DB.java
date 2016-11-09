@@ -1,5 +1,7 @@
 package cm.redis.storm.flushredis;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -85,6 +87,9 @@ public class Flush_Redis_DB {
 		String date1=null;
 		String date2=null;
 		String key=null;
+		Calendar cal=Calendar.getInstance();
+		Date curdate=new Date();
+		int days=0;
 		int num=0;
 		
 		//获取实例
@@ -95,6 +100,10 @@ public class Flush_Redis_DB {
 		
 		date1=TimeFormatter.getTheDayBeforYestoday2(); //获取前天的日期，删除前天热点的信息
 		date2=TimeFormatter.getDate2();    //获取当前日期
+		
+		cal.setTime(curdate);
+		days=cal.get(Calendar.DAY_OF_MONTH);
+		
 		//仅删除大数据魔方相关的过期数据
 		try {
 			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
@@ -114,6 +123,12 @@ public class Flush_Redis_DB {
 							redisserver.del(key);
 							num+=1;
 						}
+					}
+					
+					//每个月1日，清理热搜词
+					if(days==1&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
+						redisserver.del(key);
+						num+=1;
 					}
 				}
 			}
@@ -240,7 +255,6 @@ public class Flush_Redis_DB {
 		
 		g4jk_ref_Syn=null;
 	}
-	
 }
 
 //高流量低余额接口信息
