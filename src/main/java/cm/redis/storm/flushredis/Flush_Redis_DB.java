@@ -55,7 +55,7 @@ public class Flush_Redis_DB {
 						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
 						Flush_Redis_DB.update_g4jk_ref(null, "tcsll");		//直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_tcsll_ref.txt
 						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); //直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_webtag_ref.txt
-						Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");			//用户标签维表，标记用户的对应人群属性，每天更新一次，d243c012-5ef5-4537-ad75-21c4b90fe74f
+						Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");			//用户标签维表，仅双11使用，标记用户的对应人群属性，每天更新一次，d243c012-5ef5-4537-ad75-21c4b90fe74f
 						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");		//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 				    }
@@ -84,9 +84,9 @@ public class Flush_Redis_DB {
 		RedisServer redisserver=null;
 		TreeSet<String> keys=null; 
 		Iterator<String> keylist =null;
-		String date1=null;
-		String date2=null;
 		String key=null;
+		String date1=null; 
+		String date2=null;
 		Calendar cal=Calendar.getInstance();
 		Date curdate=new Date();
 		int days=0;
@@ -117,8 +117,7 @@ public class Flush_Redis_DB {
 						num+=1;
 					}else if(StringUtils.contains(key, date2)==true){ //保留昨天的热力图和热点区域，电商热搜词
 						if(StringUtils.contains(key, "hmset")==false
-						&&StringUtils.contains(key, "hspset")==false
-						&&StringUtils.contains(key, "ebusiw")==false){
+						&&StringUtils.contains(key, "hspset")==false){
 							redisserver.del(key);
 							num+=1;
 						}
@@ -134,11 +133,14 @@ public class Flush_Redis_DB {
 			
 			//释放内存
 			redisserver=null;
-			date1=null;
-			date2=null;
 			keys=null;
 			keylist=null;
 			key=null;
+			date1=null;
+			date2=null;
+			cal=null;
+			curdate=null;
+			
 			
 			logger.info(" Complete clear g4jk redis-keys, removes "+num+" g4 records (out of date)");					
 		} catch (Exception e) {
@@ -155,7 +157,10 @@ public class Flush_Redis_DB {
 		TreeSet<String> keys=null; 
 		Iterator<String> keylist =null;
 		String key=null;
+		Calendar cal=Calendar.getInstance();
+		Date curdate=new Date();
 		int num=0;
+		int days=0;
 		
 		//获取实例
 		redisserver=RedisServer.getInstance();
@@ -176,9 +181,13 @@ public class Flush_Redis_DB {
 //					num+=1;
 //				}
 //			}
-			
 			//2016-10-14添加，如果需要自动化，再进行更新
-			keys=redisserver.scan("ref_sjjsparams_*"); 		//获取每天需要更新的ref 相关的keys，接口获取的sjjs信息也需要每天删除一次更新，这么做可以清理掉旧的已经不使用的数据
+			//每周第一天是周日，清理全部维表
+			cal.setTime(curdate);
+			days=cal.get(Calendar.DAY_OF_WEEK);
+			if(days==1)keys=redisserver.scan("ref_*"); 
+			else keys=redisserver.scan("ref_sjjsparams_*"); 		//获取每天需要更新的ref 相关的keys，接口获取的sjjs信息也需要每天删除一次更新，这么做可以清理掉旧的已经不使用的数据
+					
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -188,12 +197,14 @@ public class Flush_Redis_DB {
 					num+=1;
 				}
 			}
-			
+
 			//释放内存
 			redisserver=null;
 			keys=null;
 			keylist=null;
 			key=null;
+			cal=null;
+			curdate=null;
 			
 			logger.info(" Complete clear g4jk_ref redis-keys, removes "+num+" ref records (out of date)");
 		} catch (Exception e) {
