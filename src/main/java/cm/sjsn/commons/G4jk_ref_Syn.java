@@ -533,6 +533,7 @@ public class G4jk_ref_Syn {
 									key="ref_hpm_"+recinfo[0].trim();
 									value=recinfo[1].trim();
 									redisserver.set(key, value);
+									redisserver.sadd("ref_hpm_set", value);//同时构造对应的集合
 								}
 								break;
 							case 4: //subid webtag 业务类别维表
