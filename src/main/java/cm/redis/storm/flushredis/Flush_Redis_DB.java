@@ -60,6 +60,7 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 				    }
 				    cleanonce=true;
+				    RedisServer.close();
 				}
 			}
 			else	{
@@ -264,6 +265,7 @@ public class Flush_Redis_DB {
 			logger.info("setSjjsParamsToRedis opt error: sjsn doesn't return any params");
 		}
 		
+		redisserver=null;
 		g4jk_ref_Syn=null;
 	}
 }

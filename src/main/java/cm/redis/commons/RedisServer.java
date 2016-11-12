@@ -80,7 +80,10 @@ public class RedisServer {
 	//关闭会话，销毁jediscluster对象
 	public static void close(){
 		 try {
-			 if(jedisCluster!=null)jedisCluster.close();
+			 if(jedisCluster!=null){
+				 jedisCluster.close();
+				 INSTANCE=null;
+			 }
 		} catch (Exception e) {
 			logger.error("Close jediscluster error: ", e);  
 		}
