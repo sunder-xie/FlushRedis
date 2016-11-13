@@ -420,7 +420,7 @@ public class RedisServer {
         try {
         	cursor="0";
         	if(pattern!=null)params.match(pattern);
-        	params.count(50);
+        	params.count(1000);
         	do{
         		scankey=jedisCluster.sscan(key, cursor, params);
         		if(scankey!=null)
