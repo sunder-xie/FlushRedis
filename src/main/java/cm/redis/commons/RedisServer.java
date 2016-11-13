@@ -158,14 +158,17 @@ public class RedisServer {
 		String cursor=null;
 		ScanParams params=new ScanParams();
 		int i=0;
-        for(String k : clusterNodes.keySet()){  
-            JedisPool jp = clusterNodes.get(k);  
-            Jedis connection = jp.getResource();  
-            try {
+		Jedis connection = null;
+		JedisPool jp = null;
+        try {
+            for(String k : clusterNodes.keySet()){  
+                jp = clusterNodes.get(k);
+                
             	cursor="0";
             	params.match(pattern);
-            	params.count(50);
+            	params.count(10000);
             	do{
+            		connection = jp.getResource(); 
             		scankey=connection.scan(cursor, params);
             		if(scankey!=null)
             		{
@@ -178,15 +181,18 @@ public class RedisServer {
             				}
             			}
             		}
+            		if(connection!=null)connection.close();//用完一定要close这个链接！！！
+            		connection=null;
             	}while(cursor.equals("0")==false); 
-                logger.info(" Get keys from"+connection.getClient().getHost() +":"+connection.getClient().getPort());
-            } catch(Exception e){  
-                logger.info(" Getting keys error: ", e);  
-            } finally{  
-                logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
-                connection.close();//用完一定要close这个链接！！！
-            }  
+            } 
+        } catch(Exception ex){  
+            logger.info(" Cluster Scans keys error: ", ex);  
+            return null;
+        } finally{  
+            //logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
+            if(connection!=null)connection.close();//用完一定要close这个链接！！！
         }  
+     
         return keys;  
 	}
 	/*通用key操作结束*/
