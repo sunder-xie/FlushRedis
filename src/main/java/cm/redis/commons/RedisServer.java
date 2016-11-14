@@ -82,8 +82,8 @@ public class RedisServer {
 		 try {
 			 if(jedisCluster!=null){
 				 jedisCluster.close();
-				 INSTANCE=null;
 			 }
+			 INSTANCE=null;
 		} catch (Exception e) {
 			logger.error("Close jediscluster error: ", e);  
 		}
