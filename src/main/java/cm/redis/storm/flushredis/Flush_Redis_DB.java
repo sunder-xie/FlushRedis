@@ -88,9 +88,9 @@ public class Flush_Redis_DB {
 		String key=null;
 		String date1=null; 
 		String date2=null;
-//		Calendar cal=Calendar.getInstance();
-//		Date curdate=new Date();
-//		int days=0;
+		Calendar cal=Calendar.getInstance();
+		Date curdate=new Date();
+		int days=0;
 		int num=0;
 		//获取实例
 		redisserver=RedisServer.getInstance();
@@ -101,8 +101,8 @@ public class Flush_Redis_DB {
 		date1=TimeFormatter.getTheDayBeforYestoday2(); //获取前天的日期，删除前天热点的信息
 		date2=TimeFormatter.getDate2();    //获取当前日期
 		
-//		cal.setTime(curdate);
-//		days=cal.get(Calendar.DAY_OF_WEEK);
+		cal.setTime(curdate);
+		days=cal.get(Calendar.DAY_OF_WEEK);
 		
 		//仅删除大数据魔方相关的过期数据
 		try {
@@ -119,17 +119,18 @@ public class Flush_Redis_DB {
 					}else if(StringUtils.contains(key, date2)==true){ //保留昨天的热力图和热点区域，百度热搜词
 						if(StringUtils.contains(key, "hmset")==false
 						&&StringUtils.contains(key, "hspset")==false
-						&&StringUtils.contains(key, "baiduw")==false){
+						&&StringUtils.contains(key, "baiduw")==false
+						&&StringUtils.contains(key, "ebusiw")==false){
 							redisserver.del(key);
 							num+=1;
 						}
 					}
 					
-//					//每周第一天是周日，清理热搜词
-//					if(days==1&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
-//						redisserver.del(key);
-//						num+=1;
-//					}
+					//每周第一天是周日，清理热搜词
+					if(days==1&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
+						redisserver.del(key);
+						num+=1;
+					}
 				}
 			}
 			
@@ -140,10 +141,9 @@ public class Flush_Redis_DB {
 			key=null;
 			date1=null;
 			date2=null;
-//			cal=null;
-//			curdate=null;
-			
-			
+			cal=null;
+			curdate=null;
+
 			logger.info(" Complete clear g4jk redis-keys, removes "+num+" g4 records (out of date)");					
 		} catch (Exception e) {
 			logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
