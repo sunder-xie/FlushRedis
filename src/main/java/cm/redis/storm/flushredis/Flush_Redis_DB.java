@@ -47,9 +47,9 @@ public class Flush_Redis_DB {
 				if(cleanonce==false){
 					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息，暂停
 					//Flush_Redis_DB.flush_biglogs();
-					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
-					Flush_Redis_DB.flush_g4jk();
-				    if(TimeFormatter.getHour().equals("14")==true){ //每天更新一次维表信息
+					 if(TimeFormatter.getHour().equals("03")==true){ //每天更新一次维表信息
+						//每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+						Flush_Redis_DB.flush_g4jk();
 						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
 						Flush_Redis_DB.flush_g4jk_ref();//仅清理掉昨天过期的触点参数信息数据
 						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
@@ -59,18 +59,22 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");		//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 						//新需求：高流量使用，低余额，已经开发好的接口：26c068d5-5cf5-4951-9df4-0e597c4f0bbb，"amtflux"
+				    }else if(TimeFormatter.getHour().equals("14")==true){
+				    	//每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+						Flush_Redis_DB.flush_g4jk();
 				    }
 				    cleanonce=true;
-				    RedisServer.close();
 				}
 			}
 			else	{
 				cleanonce=false;
-				//每隔半个小时读取最新的接口触点关键字配置信息，用于提供给storm实时分析的指标
-				Flush_Redis_DB.setSjjsParamsToRedis();
 			}
-					
-			try{					
+			
+			//每隔1小时读取最新的接口触点关键字配置信息，用于提供给storm实时分析的指标
+			Flush_Redis_DB.setSjjsParamsToRedis();
+			RedisServer.close();
+			
+			try{
 				Thread.sleep(1000*60*60);//休息1小时
 			}catch(Exception e){
 				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
@@ -199,18 +203,6 @@ public class Flush_Redis_DB {
 					num+=1;
 				}
 			}
-			
-//			if(days==1)keys=redisserver.scan("ref_hpm_*"); 
-//			else keys=null;//清理掉旧的已经不使用的数据				
-//			if(keys!=null&&keys.size()>0){
-//				keylist = keys.iterator();
-//				while(keylist.hasNext())
-//				{
-//					key=keylist.next().toString();
-//					redisserver.del(key);
-//					num+=1;
-//				}
-//			}
 			
 			if(days==1)keys=redisserver.scan("ref_imsiphn_*"); 
 			else keys=null;//清理掉旧的已经不使用的数据				
