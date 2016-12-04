@@ -49,7 +49,7 @@ public class Flush_Redis_DB {
 					//Flush_Redis_DB.flush_biglogs();
 					// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
 					Flush_Redis_DB.flush_g4jk();
-				    if(TimeFormatter.getHour().equals("03")==true){ //每天更新一次维表信息
+				    if(TimeFormatter.getHour().equals("14")==true){ //每天更新一次维表信息
 						// 每天凌晨 3 点检查维表更新，更新添加维表信息，如果获取不到最新数据，维表信息在redis中可能为空
 						Flush_Redis_DB.flush_g4jk_ref();//仅清理掉昨天过期的触点参数信息数据
 						// 获取接口数据，更新ref维表信息，所有数据文件第一行为列名，用;隔开，第二行开始是数据记录，记录内数据之间同样用分号隔开
@@ -58,6 +58,7 @@ public class Flush_Redis_DB {
 						//Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");			//用户标签维表，仅双11使用，标记用户的对应人群属性，每天更新一次，d243c012-5ef5-4537-ad75-21c4b90fe74f
 						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");		//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
+						//新需求：高流量使用，低余额，已经开发好的接口：26c068d5-5cf5-4951-9df4-0e597c4f0bbb，"amtflux"
 				    }
 				    cleanonce=true;
 				    RedisServer.close();
@@ -107,7 +108,7 @@ public class Flush_Redis_DB {
 		//仅删除大数据魔方相关的过期数据
 		try {
 			logger.info(" Start to clear g4jk storm-redis-keys which are out of date!!!");
-			keys=redisserver.scan("mfg4*");  	//获取前天的全部信息
+			keys=redisserver.scan("mfg4_*");  	//获取前天的全部信息
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -173,23 +174,7 @@ public class Flush_Redis_DB {
 		try {
 			logger.info(" Start to clear g4jk_ref storm-redis-keys which are out of date!!!");
 			//2016-10-14添加，如果需要自动化，再进行更新
-//			keys=redisserver.scan("ref_imsiphn_*"); 		//获取每天需要更新的ref 相关的keys，imsi与号码翻译是必须要每天更新一次的
-//			if(keys!=null&&keys.size()>0){
-//				keylist = keys.iterator();
-//				while(keylist.hasNext())
-//				{
-//					key=keylist.next().toString();
-//					redisserver.del(key);
-//					num+=1;
-//				}
-//			}
-			//2016-10-14添加，如果需要自动化，再进行更新
-			//每周第一天是周日，清理全部维表
-			cal.setTime(curdate);
-			days=cal.get(Calendar.DAY_OF_WEEK);
-			if(days==1)keys=redisserver.scan("ref_*"); 
-			else keys=null;//redisserver.scan("ref_sjjsparams_*"); 		//获取每天需要更新的ref 相关的keys，接口获取的sjjs信息也需要每天删除一次更新，这么做可以清理掉旧的已经不使用的数据
-					
+			keys=redisserver.scan("ref_sjjsparams_*"); 		//获取每天需要更新的ref 相关的keys，接口获取的sjjs信息也需要每天删除一次更新，这么做可以清理掉旧的已经不使用的数据				
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
 				while(keylist.hasNext())
@@ -199,7 +184,46 @@ public class Flush_Redis_DB {
 					num+=1;
 				}
 			}
-
+			//2016-10-14添加，如果需要自动化，再进行更新
+			//每周第一天是周日，清理全部维表,分多次删除，避免内存不足
+			cal.setTime(curdate);
+			days=cal.get(Calendar.DAY_OF_WEEK);
+			if(days==1)keys=redisserver.scan("ref_hsp_*"); 
+			else keys=null;//清理掉旧的已经不使用的数据				
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					redisserver.del(key);
+					num+=1;
+				}
+			}
+			
+//			if(days==1)keys=redisserver.scan("ref_hpm_*"); 
+//			else keys=null;//清理掉旧的已经不使用的数据				
+//			if(keys!=null&&keys.size()>0){
+//				keylist = keys.iterator();
+//				while(keylist.hasNext())
+//				{
+//					key=keylist.next().toString();
+//					redisserver.del(key);
+//					num+=1;
+//				}
+//			}
+			
+			if(days==1)keys=redisserver.scan("ref_imsiphn_*"); 
+			else keys=null;//清理掉旧的已经不使用的数据				
+			if(keys!=null&&keys.size()>0){
+				keylist = keys.iterator();
+				while(keylist.hasNext())
+				{
+					key=keylist.next().toString();
+					redisserver.del(key);
+					num+=1;
+				}
+			}
+			
 			//释放内存
 			redisserver=null;
 			keys=null;
