@@ -131,8 +131,8 @@ public class Flush_Redis_DB {
 						}
 					}
 					
-					//每周第一天是周日，清理热搜词
-					if(days==1&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
+					//每周第7天是周六，清理热搜词
+					if(days==7&&(StringUtils.contains(key, "EBusiSet")==true||StringUtils.contains(key, "BaiduSet")==true)){
 						redisserver.del(key);
 						num+=1;
 					}
@@ -189,10 +189,10 @@ public class Flush_Redis_DB {
 				}
 			}
 			//2016-10-14添加，如果需要自动化，再进行更新
-			//每周第一天是周日，清理全部维表,分多次删除，避免内存不足
+			//每周第7天是周六，清理全部维表,分多次删除，避免内存不足
 			cal.setTime(curdate);
 			days=cal.get(Calendar.DAY_OF_WEEK);
-			if(days==1)keys=redisserver.scan("ref_hsp_*"); 
+			if(days==7)keys=redisserver.scan("ref_hsp_*"); 
 			else keys=null;//清理掉旧的已经不使用的数据				
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
@@ -204,7 +204,7 @@ public class Flush_Redis_DB {
 				}
 			}
 			
-			if(days==1)keys=redisserver.scan("ref_imsiphn_*"); 
+			if(days==7)keys=redisserver.scan("ref_imsiphn_*"); 
 			else keys=null;//清理掉旧的已经不使用的数据				
 			if(keys!=null&&keys.size()>0){
 				keylist = keys.iterator();
