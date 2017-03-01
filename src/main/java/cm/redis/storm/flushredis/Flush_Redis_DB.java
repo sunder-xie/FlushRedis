@@ -57,7 +57,7 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.update_g4jk_ref(null, "webtag"); //直接对已有的ref文件进行更新，这个维表不会经常更新，ref文件:tb_mofang_webtag_ref.txt
 						//Flush_Redis_DB.update_g4jk_ref("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");			//用户标签维表，仅双11使用，标记用户的对应人群属性，每天更新一次，d243c012-5ef5-4537-ad75-21c4b90fe74f
 						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");		//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
-						//Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679，2017年2月13日因触点暂停而暂停
+						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  //号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 						//新需求：高流量使用，低余额，已经开发好的接口：26c068d5-5cf5-4951-9df4-0e597c4f0bbb，"amtflux"
 				    }else if(TimeFormatter.getHour().equals("14")==true){
 				    	//每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
