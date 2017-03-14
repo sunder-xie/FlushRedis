@@ -255,6 +255,7 @@ public class Flush_Redis_DB {
 		int split=0;
 		String key=null;
 		String value=null;
+		String sjjsset=null;
 		//获取实例
 		RedisServer redisserver=RedisServer.getInstance();
 		if(returnjson!=null&&returnjson.equals("")==false){
@@ -271,6 +272,8 @@ public class Flush_Redis_DB {
 						key=record.substring(0, split).trim().toUpperCase();
 						value=record.substring(split+1);
 						if(key.contains("SJJS")==true&&value.length()>0){
+							sjjsset="ref_sjjsparams_set";
+							redisserver.sadd(sjjsset, key);
 							key="ref_sjjsparams_"+key;
 							redisserver.set(key, value);
 						}
