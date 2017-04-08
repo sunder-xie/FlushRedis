@@ -160,10 +160,11 @@ public class RedisServer {
 		int i=0;
 		Jedis connection = null;
 		JedisPool jp = null;
-        try {
-            for(String k : clusterNodes.keySet()){  
+        
+		for(String k : clusterNodes.keySet()){
+           try {
                 jp = clusterNodes.get(k);
-                
+
             	cursor="0";
             	params.match(pattern);
             	params.count(10000);
@@ -184,15 +185,12 @@ public class RedisServer {
             		if(connection!=null)connection.close();//用完一定要close这个链接！！！
             		connection=null;
             	}while(cursor.equals("0")==false); 
-            } 
-        } catch(Exception ex){  
-            logger.info(" Cluster Scans keys error: ", ex);  
-            return null;
-        } finally{  
-            //logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
-            if(connection!=null)connection.close();//用完一定要close这个链接！！！
-        }  
-     
+           } catch(Exception ex){  
+        	   logger.info(" Cluster Scans keys error: ", ex);  
+           }
+           //logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
+           if(connection!=null)connection.close();//用完一定要close这个链接！！！  
+		}
         return keys;  
 	}
 	/*通用key操作结束*/
