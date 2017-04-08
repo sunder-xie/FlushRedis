@@ -42,7 +42,7 @@ public class Flush_Redis_DB {
 		while(true)
 		{
 			//每天固定凌晨3点清理一次数据
-			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("14")==true)
+			if(TimeFormatter.getHour().equals("03")==true||TimeFormatter.getHour().equals("15")==true)
 			{
 				if(cleanonce==false){
 					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息，暂停
@@ -59,8 +59,8 @@ public class Flush_Redis_DB {
 						Flush_Redis_DB.update_g4jk_ref("c1ed7776-a16b-4472-a1bd-954df3925466", "hotspot");			//tac ci与热点区域转换维表，这个维表不会经常更新，c1ed7776-a16b-4472-a1bd-954df3925466
 						Flush_Redis_DB.update_g4jk_ref("0b67bada-c954-418d-aa25-347b5810c679", "imsiphnum");  	//号码与imsi转换表，每天更新一次，0b67bada-c954-418d-aa25-347b5810c679
 						//新需求：高流量使用，低余额，已经开发好的接口：26c068d5-5cf5-4951-9df4-0e597c4f0bbb，"amtflux"
-				    }else if(TimeFormatter.getHour().equals("14")==true){
-				    	//每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
+				    }else if(TimeFormatter.getHour().equals("15")==true){
+				    	//每天凌晨 3 点与下午15点执行，负责清理网分数据过期的实时信息
 						Flush_Redis_DB.flush_g4jk();
 				    }
 				    cleanonce=true;
