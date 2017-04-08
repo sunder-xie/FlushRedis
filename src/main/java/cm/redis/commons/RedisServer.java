@@ -170,6 +170,7 @@ public class RedisServer {
             	params.count(10000);
             	do{
             		connection = jp.getResource(); 
+            		
             		scankey=connection.scan(cursor, params);
             		if(scankey!=null)
             		{
@@ -187,6 +188,7 @@ public class RedisServer {
             	}while(cursor.equals("0")==false); 
            } catch(Exception ex){  
         	   logger.info(" Cluster Scans keys error: ", ex);  
+        	   if(connection!=null)connection.close();//用完一定要close这个链接！！！
            }
            //logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
            if(connection!=null)connection.close();//用完一定要close这个链接！！！  
