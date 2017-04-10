@@ -189,9 +189,9 @@ public class RedisServer {
            } catch(Exception ex){  
         	   logger.info(" Cluster Scans keys error: ", ex);  
         	   if(connection!=null)connection.close();//用完一定要close这个链接！！！
+        	   connection = null;
            }
            //logger.info(" "+connection.getClient().getHost() +":"+connection.getClient().getPort()+" Connection closed.");  
-           if(connection!=null)connection.close();//用完一定要close这个链接！！！  
 		}
         return keys;  
 	}
