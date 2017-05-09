@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import cm.redis.commons.RedisServer;
 import cm.redis.commons.ResourcesConfig;
+//import cm.redis.commons.TimeFormatter;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
@@ -69,7 +70,12 @@ public class G4jk_ref_Syn {
 				//解析接口数据
 				if(private_folder==null||private_folder.trim().equals(""))private_folder="default";//默认制定一个文件夹
 				url="http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+//				if(StringUtils.equals(sjsn_id,"26c068d5-5cf5-4951-9df4-0e597c4f0bbb")==false)
+//				{
 				json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"STORM\", \"password\": \"Srm_xxy_2016\", \"systemName\": \"STORM\"}";
+//				}else{
+//					json= "{ \"identify\": \""+sjsn_id+"\", \"userName\": \"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\""+TimeFormatter.getYestoday()+"\",\"flux\":\"300\",\"amt\":\"5000\"}}";
+//				}
 				deletefiles(private_folder); 
 				ftpinfo=getfileinfo(url,json);
 				check=downloadfile(ftpinfo,private_folder);
@@ -179,6 +185,7 @@ public class G4jk_ref_Syn {
 	                	bodyBuffer.append(statusCode);
 	                }
 	    	        String body = bodyBuffer.toString();
+	    	        //System.out.println(body); //测试代码段，观察接口返回的信息
 	    		    if(StringUtils.contains(body, "status"))
 	    		    {
 	    		    	body=StringUtils.substringBetween(body, "{","}");
@@ -556,8 +563,7 @@ public class G4jk_ref_Syn {
 			{
 				logger.info(" [processunzipfile method] runing error: "+ex.getMessage());
 			}
-		}
-		
+		}		
 		
 		/**
 		 * 按照接口格式获取接口返回的数据信息，结果为json格式，变量带双引号
@@ -661,6 +667,15 @@ public class G4jk_ref_Syn {
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f",null);
 			//g4jk_ref_Syn.ref_data_syn("d243c012-5ef5-4537-ad75-21c4b90fe74f","custtag");
 			//g4jk_ref_Syn.ref_data_syn("c1ed7776-a16b-4472-a1bd-954df3925466","hotspot");
+//			g4jk_ref_Syn.ref_data_syn("26c068d5-5cf5-4951-9df4-0e597c4f0bbb","fluxmonitor");
+			
+			//流量剩余情况测试接口文件下载，成功
+//			String add_url = "http://10.245.254.110:8080/etl_platform/rest/service.shtml";
+//			String json_params = "{\"identify\": \"26c068d5-5cf5-4951-9df4-0e597c4f0bbb\", \"userName\":\"ST_BIGDATA\",\"password\":\"Gmcc_345\",\"systemName\":\"STORM\",\"parameter\":{\"tm_intrvl_cd\":\""+TimeFormatter.getYestoday()+"\",\"flux\":\"100\",\"amt\":\"20\"}}";
+//			Ftpfilebasicinfo fileinfo=g4jk_ref_Syn.getfileinfo(add_url,json_params);
+//			if(fileinfo!=null){
+//				System.out.println(fileinfo.getFilename());
+//			}
 		}
 }
 
