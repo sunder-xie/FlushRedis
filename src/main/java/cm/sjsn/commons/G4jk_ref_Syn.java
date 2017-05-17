@@ -498,6 +498,7 @@ public class G4jk_ref_Syn {
 					else if(StringUtils.contains(tempString, "hotsid"))choose=2;	//读取tac ci对应区域的标签维表
 					else if(StringUtils.contains(tempString, "tac_ci"))choose=3; 	//读取tac ci对应相同经纬度tac ci的翻译维表
 					else if(StringUtils.contains(tempString, "subid"))choose=4; 	//读取已经去重的业务大类与小类的翻译维表
+					else if(StringUtils.contains(tempString, "TAC_CI"))choose=5; //读取tac ci对应的纬度经度翻译维表
 					while ((tempString = reader.readLine()) != null) {
 						// 以下则是逐行将数据做转换，录入redis数据库
 						recinfo=tempString.split(";"); //按照分号划分获取字段,一个用户可能有多个id
@@ -546,6 +547,13 @@ public class G4jk_ref_Syn {
 							case 4: //subid webtag 业务类别维表
 								if(recinfo.length>=2){
 									key="ref_wtag_"+recinfo[0].trim();
+									value=recinfo[1].trim();
+									redisserver.set(key, value);
+								}
+								break;
+							case 5: //TAC_CI LL对应维表
+								if(recinfo.length>=2){
+									key="ref_ll_"+recinfo[0].trim();
 									value=recinfo[1].trim();
 									redisserver.set(key, value);
 								}
