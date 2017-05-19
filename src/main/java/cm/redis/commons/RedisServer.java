@@ -17,6 +17,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.SortingParams;
+import redis.clients.jedis.Tuple;
 
 /**
  * 2016-09-1 Jedis是2.9.0版本，对应的Redis服务器是3.2.3版本，用于构建cluster连接池与操作的封装类
@@ -606,6 +607,122 @@ public class RedisServer {
 		return res;
 	}
 	/*排序操作封装结束*/
+	/*Sorted set 操作接口封装 */
+	/**
+	 * 往排序集合中添加成员和分数
+	 * 为有序集key的成员member的score值加上增量increment。
+	 * 如果key中不存在member，就在key中添加一个member，score是increment。
+	 * 如果key不存在，就创建一个只含有指定member成员的有序集合，score是increment。
+	 * @param key
+	 * @param score
+	 * @param member
+	 * @return 成员的新分数
+	 */
+	public double zincrby(String key, double score, String member){
+		double res=0.0;
+		try{
+			res=jedisCluster.zincrby(key, score, member);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zincrby error: ", e);
+			return 0.0;
+		}
+		return res;
+	}
+	
+	/**
+	 * 获取sorted set中的元素个数
+	 * @param key
+	 * @return
+	 */
+	public long zcard(String key){
+		long res=0;
+		try{
+			res=jedisCluster.zcard(key);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zcard error: ", e);
+			return 0;
+		}
+		return res;
+	}
+	
+	/**
+	 * 对	sorted set	按照分数从高到低进行排序
+	 * @param key
+	 * @param min
+	 * @param max
+	 * @param offset	从排序后的结果第offset个开始取记录，offset从0开始
+	 * @param count	限制获取的记录个数
+	 * @return
+	 */
+	public Set<String> zrevrangebyscore(String key, String min, String max, int offset,int count){
+		Set<String> res =null;
+		try{
+			res=jedisCluster.zrevrangeByScore(key, max, min, offset, count);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zrangebyscore error: ", e);
+			return null;
+		}
+		return res;
+	}
+	
+	/**
+	 * 对	sorted set	按照分数从高到低进行排序
+	 * @param key
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public Set<String> zrevrangebyscore(String key, String min, String max){
+		Set<String> res =null;
+		try{
+			res=jedisCluster.zrevrangeByScore(key, max, min);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zrangebyscore error: ", e);
+			return null;
+		}
+		return res;
+	}
+	
+	/**
+	 * 对	sorted set	按照分数从高到低进行排序 并获取对应的分数
+	 * @param key
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public Set<Tuple> zrevrangebyscorewithscores(String key, String min, String max){
+		Set<Tuple> res =null;
+		try{
+			res=jedisCluster.zrevrangeByScoreWithScores(key, max, min);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zrangebyscore error: ", e);
+			return null;
+		}
+		return res;
+	}
+	
+	/**
+	 * 对	sorted set	按照分数从高到低进行排序 并获取对应的分数
+	 * @param key
+	 * @param min
+	 * @param max
+	 * @param offset	从排序后的结果第offset个开始取记录，offset从0开始
+	 * @param count	限制获取的记录个数
+	 * @return
+	 */
+	public Set<Tuple> zrevrangebyscorewithscores(String key, String min, String max, int offset,int count){
+		Set<Tuple> res =null;
+		try{
+			res=jedisCluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+		}catch(Exception e){
+			logger.error("Jediscluster opt zrangebyscore error: ", e);
+			return null;
+		}
+		return res;
+	}
+	
+	/*Sorted set 操作接口封装操作结束 */
+	
 	
 	/*redis cluster不支持事务操作*/
 }
