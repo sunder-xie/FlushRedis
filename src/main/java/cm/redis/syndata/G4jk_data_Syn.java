@@ -1,14 +1,18 @@
 package cm.redis.syndata;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import cm.redis.commons.FileServer;
 import cm.redis.commons.RedisServer;
+import cm.redis.commons.ResourcesConfig;
 import cm.redis.commons.TimeFormatter;
+
+import redis.clients.jedis.Tuple;
 
 
 
@@ -26,27 +30,115 @@ public class G4jk_data_Syn {
 	 */
 	public static void putUntouchSetPhnumsInfoToFile(){
 		RedisServer redisServer=RedisServer.getInstance();
-		String tdate=TimeFormatter.getDate2();		//仅获取当天的数据
+		FileServer fileserver=FileServer.getInstance();
+		String tdate=TimeFormatter.getYestoday2();		//仅获取昨天的数据
 		String key=null;
 		TreeSet<String> RedisUnTouchPhones=null;
-		Iterator<String> phonenum=null;
+		Iterator<String> phnlist=null;
+		String phnnum=null;
+		Set<Tuple> fretuples=null;
+		String appid=null;
+		String appname=null;
+		Set<String> timestuples=null;
+		String timestamp=null;
+		Set<String> placestuples=null;
+		String placestamp=null;
+		String lalg=null;
+		String[] divide=null;
+		String contentline=null;
+
+		double fre=0.0;
 		
-		List<UserAppPreferInfo> userAppPreferInfoList=null;
 		int total=0;
+		int usercatch=0;
 		
+		//获取全量触点的号码
 		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" starts...");
 		key="mfg4_"+tdate+"_UnTouchSet";
 		RedisUnTouchPhones=redisServer.sscan(key, null);
 		
 		if(RedisUnTouchPhones!=null&&RedisUnTouchPhones.size()>0){
 			total=0;
-			phonenum=RedisUnTouchPhones.iterator();
-			while(phonenum.hasNext()){
-				//
+			phnlist=RedisUnTouchPhones.iterator();
+			while(phnlist.hasNext()){
+				//获取每天使用频次超过10次以上的app，类别归属视频，音乐，游戏，网络购物，影音图像
+				phnnum=phnlist.next().toString();
+				if(phnnum!=null){
+					key="mfg4_"+tdate+"_AppPoint_fre_"+phnnum;
+					fretuples=redisServer.zrevrangebyscorewithscores(key, "10", "+inf");
+					key="mfg4_"+tdate+"_AppPoint_times_"+phnnum;
+					timestuples=redisServer.zrevrangebyscore(key, "10", "+inf");
+					key="mfg4_"+tdate+"_AppPoint_places_"+phnnum;
+					placestuples=redisServer.zrevrangebyscore(key, "10", "+inf");
+					if(fretuples!=null&&fretuples.size()>0){
+						for(Tuple fretpl: fretuples){
+							appid=fretpl.getElement();
+							fre=fretpl.getScore();
+							key="ref_wtag_"+appid;
+							appname=redisServer.get(key);
+							if(appname!=null&&
+							(StringUtils.contains(appname, "视频")==true||StringUtils.contains(appname, "音乐")==true||
+							StringUtils.contains(appname, "游戏")==true||StringUtils.contains(appname, "网络购物")==true||
+							StringUtils.contains(appname, "影音图像")==true)){
+								usercatch+=1;
+								timestamp="";
+								for(String timestpl:timestuples){
+									divide=timestpl.split("_");
+									if(divide!=null&&divide.length>=3)
+									{
+										if(StringUtils.equals(appid, divide[2])==true)
+											timestamp+=(divide[0]+"_"+divide[1]+";");
+									}
+								}
+								placestamp="";
+								for(String placestpl:placestuples){
+									divide=placestpl.split("_");
+									if(divide!=null&&divide.length>=3)
+									{
+										if(StringUtils.equals(appid, divide[2])==true){
+											key="ref_ll_"+divide[0]+"_"+divide[1];
+											lalg=redisServer.get(key);
+											placestamp+=(lalg+";");
+										}
+									}
+								}
+							}
+							//写入文件
+							contentline=phnnum+"|"+appid+"|"+appname+"|"+fre+"|"+timestamp+"|"+placestamp+"\n";
+							fileserver.setWordsToFile(contentline, ResourcesConfig.RECORD_DATAFILE);
+						}
+					}
+					
+				}
 				
+				
+				
+				
+				
+				total+=1;
 			}
 		}
 		
 		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" completes processing records: "+total);
+		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" catches records: "+usercatch);
+		//释放内存
+		redisServer=null;
+		fileserver=null;
+		tdate=null;
+		key=null;
+		RedisUnTouchPhones=null;
+		phnlist=null;
+		phnnum=null;
+		fretuples=null;
+		appid=null;
+		appname=null;
+		timestuples=null;
+		timestamp=null;
+		divide=null;
+		placestuples=null;
+		placestamp=null;
+		lalg=null;
+		divide=null;
+		contentline=null;
 	}
 }
