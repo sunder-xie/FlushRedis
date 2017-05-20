@@ -42,7 +42,7 @@ public class G4jk_data_Syn {
 			total=0;
 			phonenum=RedisUnTouchPhones.iterator();
 			while(phonenum.hasNext()){
-				
+				//
 				
 			}
 		}
