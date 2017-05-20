@@ -431,7 +431,7 @@ public class RedisServer {
         			if(tmplist!=null&&tmplist.size()>0){
         				if(tmplist.get(0).contains("empty list or set")==false)
         				{
-        					for(i=0;i<tmplist.size();i++)members.add(tmplist.get(i));//将String元素逐个加入，默认重复不会加入
+        					for(i=0;i<tmplist.size();i++)members.add(tmplist.get(i));	//将String元素逐个加入，默认重复不会加入
         				}
         			}
         		}

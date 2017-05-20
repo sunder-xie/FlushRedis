@@ -48,7 +48,8 @@ public class Flush_Redis_DB {
 					// 每天凌晨 3 点与下午14点执行，负责清理大日志数据过期的实时信息，暂停
 					// Flush_Redis_DB.flush_biglogs();
 					 if(TimeFormatter.getHour().equals("02")==true){ //每天更新一次维表信息
-						// 每天进行一次号码场景信息采集
+						// 每天进行一次号码流量，app使用场景的信息采集
+						
 						 
 						// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
 						Flush_Redis_DB.flush_g4jk();
@@ -290,6 +291,8 @@ public class Flush_Redis_DB {
 		redisserver=null;
 		g4jk_ref_Syn=null;
 	}
+	
+	
 }
 
 //高流量低余额接口信息
