@@ -59,7 +59,9 @@ public class G4jk_data_Syn {
 		
 		if(RedisUnTouchPhones!=null&&RedisUnTouchPhones.size()>0){
 			total=0;
+			usercatch=0;
 			phnlist=RedisUnTouchPhones.iterator();
+			contentline="";
 			while(phnlist.hasNext()){
 				//获取每天使用频次超过10次以上的app，类别归属视频，音乐，游戏，网络购物，影音图像
 				phnnum=phnlist.next().toString();
@@ -102,24 +104,22 @@ public class G4jk_data_Syn {
 										}
 									}
 								}
+								
+								//写入文件
+								contentline+=phnnum+"|"+appid+"|"+appname+"|"+fre+"|"+timestamp+"|"+placestamp+"\n";
+								if(usercatch%20==0){
+									fileserver.setWordsToFile(contentline, ResourcesConfig.RECORD_DATAFILE);
+									contentline="";
+								}
 							}
-							//写入文件
-							contentline=phnnum+"|"+appid+"|"+appname+"|"+fre+"|"+timestamp+"|"+placestamp+"\n";
-							fileserver.setWordsToFile(contentline, ResourcesConfig.RECORD_DATAFILE);
 						}
 					}
-					
 				}
-				
-				
-				
-				
-				
 				total+=1;
 			}
 		}
 		
-		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" completes processing records: "+total);
+		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" completes processing phones: "+total);
 		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" catches records: "+usercatch);
 		//释放内存
 		redisServer=null;
