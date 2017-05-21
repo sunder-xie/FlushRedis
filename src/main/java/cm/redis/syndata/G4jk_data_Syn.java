@@ -28,7 +28,7 @@ public class G4jk_data_Syn {
 	 * 获取 storm 每天可以满足触点需求的 号码量 根据流量使用情况放入到文件中，
 	 * 文件在10.245.254.56上自动入库到hdfs中，用于后续场景分析挖掘，形成规则
 	 */
-	public static void putUntouchSetPhnumsInfoToFile(){
+	public void putUntouchSetPhnumsInfoToFile(){
 		RedisServer redisServer=RedisServer.getInstance();
 		FileServer fileserver=FileServer.getInstance();
 		String tdate=TimeFormatter.getYestoday2();		//仅获取昨天的数据

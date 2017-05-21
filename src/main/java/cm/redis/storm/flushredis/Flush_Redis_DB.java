@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cm.redis.commons.RedisServer;
 import cm.redis.commons.TimeFormatter;
+import cm.redis.syndata.G4jk_data_Syn;
 import cm.sjsn.commons.G4jk_ref_Syn;
 
 /**
@@ -49,7 +50,7 @@ public class Flush_Redis_DB {
 					// Flush_Redis_DB.flush_biglogs();
 					 if(TimeFormatter.getHour().equals("02")==true){ //每天更新一次维表信息
 						// 每天进行一次号码流量，app使用场景的信息采集
-						
+						Flush_Redis_DB.processUserAppPreferData();
 						 
 						// 每天凌晨 3 点与下午14点执行，负责清理网分数据过期的实时信息
 						Flush_Redis_DB.flush_g4jk();
@@ -84,6 +85,15 @@ public class Flush_Redis_DB {
 				logger.info(" Thread Flush_Redis_DB crashes: "+e.getMessage());
 			}
 		}
+	}
+	
+	/**
+	 * 后台单独处理场景文件
+	 */
+	public static void processUserAppPreferData(){
+		G4jk_data_Syn g4jk_data_Syn=new G4jk_data_Syn();
+		g4jk_data_Syn.putUntouchSetPhnumsInfoToFile();
+		g4jk_data_Syn=null;
 	}
 	
 	/**
@@ -291,7 +301,6 @@ public class Flush_Redis_DB {
 		redisserver=null;
 		g4jk_ref_Syn=null;
 	}
-	
 	
 }
 
