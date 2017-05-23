@@ -43,8 +43,8 @@ public class G4jk_data_Syn {
 		String timestamp=null;
 		Set<String> placestuples=null;
 		String placestamp=null;
-		String lalg=null;
-		String[] divide=null;
+		int tag=0;
+		String divide=null;
 		String contentline=null;
 
 		double fre=0.0;
@@ -85,24 +85,18 @@ public class G4jk_data_Syn {
 								usercatch+=1;
 								timestamp="";
 								for(String timestpl:timestuples){
-									divide=timestpl.split("_");
-									if(divide!=null&&divide.length>=3)
-									{
-										if(StringUtils.equals(appid, divide[2])==true)
-											timestamp+=(divide[0]+"_"+divide[1]+";");
-									}
+									tag=timestpl.lastIndexOf("_");
+									divide=timestpl.substring(tag+1);
+									if(divide!=null&&StringUtils.equals(appid, divide)==true)
+										timestamp+=(timestpl.substring(0, tag));
+									
 								}
 								placestamp="";
 								for(String placestpl:placestuples){
-									divide=placestpl.split("_");
-									if(divide!=null&&divide.length>=3)
-									{
-										if(StringUtils.equals(appid, divide[2])==true){
-											key="ref_ll_"+divide[0]+"_"+divide[1];
-											lalg=redisServer.get(key);
-											placestamp+=(lalg+";");
-										}
-									}
+									tag=placestpl.lastIndexOf("_");
+									divide=placestpl.substring(tag+1);
+									if(divide!=null&&StringUtils.equals(appid, divide)==true)
+										timestamp+=(placestpl.substring(0, tag));
 								}
 								
 								//写入文件
@@ -141,7 +135,6 @@ public class G4jk_data_Syn {
 		divide=null;
 		placestuples=null;
 		placestamp=null;
-		lalg=null;
 		divide=null;
 		contentline=null;
 	}
