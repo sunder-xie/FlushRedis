@@ -88,8 +88,7 @@ public class G4jk_data_Syn {
 									tag=timestpl.lastIndexOf("_");
 									divide=timestpl.substring(tag+1);
 									if(divide!=null&&StringUtils.equals(appid, divide)==true)
-										timestamp+=(timestpl.substring(0, tag)+";");
-									
+										timestamp+=(timestpl.substring(0, tag)+";");							
 								}
 								placestamp="";
 								for(String placestpl:placestuples){
