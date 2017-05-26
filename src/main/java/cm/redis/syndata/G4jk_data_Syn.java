@@ -54,7 +54,7 @@ public class G4jk_data_Syn {
 		
 		//获取全量触点的号码
 		logger.info(" Thread G4jk_data_Syn "+TimeFormatter.getNow() +" starts...");
-		key="mfg4_"+tdate+"_UnTouchSet";
+		key="mfg4_"+tdate+"_AppPoint_Set";
 		RedisUnTouchPhones=redisServer.sscan(key, null);
 		
 		if(RedisUnTouchPhones!=null&&RedisUnTouchPhones.size()>0){
@@ -79,9 +79,11 @@ public class G4jk_data_Syn {
 							key="ref_wtag_"+appid;
 							appname=redisServer.get(key);
 							if(appname!=null&&
-							(StringUtils.contains(appname, "视频")==true||StringUtils.contains(appname, "音乐")==true||
-							StringUtils.contains(appname, "游戏")==true||StringUtils.contains(appname, "网络购物")==true||
-							StringUtils.contains(appname, "影音图像")==true)){
+							(StringUtils.contains(appname, "游戏")==true||StringUtils.contains(appname, "社交")==true||
+							StringUtils.contains(appname, "即时通信")==true||StringUtils.contains(appname, "旅游出行")==true||
+							StringUtils.contains(appname, "金融理财")==true||StringUtils.contains(appname, "网络购物")==true||
+							StringUtils.contains(appname, "新闻资讯")==true||StringUtils.contains(appname, "音频")==true||
+							StringUtils.contains(appname, "视频")==true||StringUtils.contains(appname, "影音图像")==true)){
 								usercatch+=1;
 								timestamp="";
 								for(String timestpl:timestuples){
