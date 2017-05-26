@@ -79,8 +79,7 @@ public class G4jk_data_Syn {
 							key="ref_wtag_"+appid;
 							appname=redisServer.get(key);
 							if(appname!=null&&
-							(StringUtils.contains(appname, "游戏")==true||StringUtils.contains(appname, "社交")==true||
-							StringUtils.contains(appname, "即时通信")==true||StringUtils.contains(appname, "旅游出行")==true||
+							(StringUtils.contains(appname, "游戏")==true||	StringUtils.contains(appname, "旅游出行")==true||
 							StringUtils.contains(appname, "金融理财")==true||StringUtils.contains(appname, "网络购物")==true||
 							StringUtils.contains(appname, "新闻资讯")==true||StringUtils.contains(appname, "音频")==true||
 							StringUtils.contains(appname, "视频")==true||StringUtils.contains(appname, "影音图像")==true)){
