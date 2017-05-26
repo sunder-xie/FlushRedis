@@ -101,7 +101,7 @@ public class G4jk_data_Syn {
 								
 								//写入文件
 								contentline+=phnnum+"|"+appid+"|"+appname+"|"+fre+"|"+timestamp+"|"+placestamp+"\n";
-								if(usercatch%200==0){
+								if(usercatch%400==0){
 									fileserver.setWordsToFile(contentline, ResourcesConfig.RECORD_DATAFILE);
 									contentline="";
 								}
